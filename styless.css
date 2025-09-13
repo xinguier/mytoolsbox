@@ -1,0 +1,47 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+/* 顶部工具栏 */
+.toolbar {
+  background-color: #0078d7;
+  padding: 12px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.toolbar button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  background-color: #fff;
+  color: #0078d7;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.2s;
+}
+
+.toolbar button:hover {
+  background-color: #e6f2ff;
+}
+
+/* 编辑区域容器 */
+.editor-container {
+  display: flex;
+  height: calc(100vh - 60px); /* 减去工具栏高度，占满剩余视口 */
+}
+
+/* 输入/输出文本域 */
+.editor-container textarea {
+  flex: 1;
+  padding: 12px;
+  font-family: "Consolas", "Monaco", monospace; /* 等宽字体，适合代码显示 */
+  font-size: 14px;
+  border: 1px solid #ddd;
+  resize: none; /* 禁止手动调整大小 */
+  outline: none;
+}

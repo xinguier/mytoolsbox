@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>JSON格式化工具</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- 顶部工具栏 -->
+  <header class="toolbar">
+    <button id="format">格式化JSON</button>
+    <button id="compress">压缩JSON</button>
+    <button id="copy">复制结果</button>
+    <button id="clear">清空内容</button>
+  </header>
+
+  <!-- 编辑区域：左（输入）、右（输出） -->
+  <main class="editor-container">
+    <textarea id="input" placeholder="请输入JSON内容..."></textarea>
+    <textarea id="output" placeholder="格式化/压缩后的结果将显示在这里..."></textarea>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
