@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JSON格式化工具</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  
+  <!-- Tailwind配置 -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#3b82f6',
+            secondary: '#64748b',
+            success: '#10b981',
+            danger: '#ef4444',
+            dark: '#1e293b',
+          },
+          fontFamily: {
+            mono: ['Consolas', 'Monaco', 'Courier New', 'monospace'],
+          },
+        },
+      }
+    }
+  </script>
+  
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .editor-shadow {
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      }
+      .btn-hover {
+        @apply transition-all duration-200 hover:shadow-md transform hover:-translate-y-0.5;
+      }
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col">
+  <!-- 顶部导航 -->
+  <header class="bg-white shadow-sm border-b border-gray-200">
+    <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+      <h1 class="text-xl font-bold text-primary flex items-center">
+        <i class="fa fa-code mr-2"></i>
+        JSON格式化工具
+      </h1>
+      <div id="status-indicator" class="text-sm hidden"></div>
+    </div>
+  </header>
+
+  <!-- 工具栏 -->
+  <div class="bg-white border-b border-gray-200">
+    <div class="container mx-auto px-4 py-2 flex flex-wrap gap-2">
+      <button id="format" class="bg-primary text-white px-4 py-2 rounded-md flex items-center btn-hover">
+        <i class="fa fa-indent mr-2"></i>格式化
+      </button>
+      <button id="compress" class="bg-secondary text-white px-4 py-2 rounded-md flex items-center btn-hover">
+        <i class="fa fa-compress mr-2"></i>压缩
+      </button>
+      <button id="copy" class="bg-success text-white px-4 py-2 rounded-md flex items-center btn-hover">
+        <i class="fa fa-copy mr-2"></i>复制结果
+      </button>
+      <button id="clear" class="bg-danger text-white px-4 py-2 rounded-md flex items-center btn-hover">
+        <i class="fa fa-trash mr-2"></i>清空内容
+      </button>
+    </div>
+  </div>
+
+  <!-- 主内容区 -->
+  <main class="flex-1 container mx-auto px-4 py-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-140px)]">
+      <!-- 输入区域 -->
+      <div class="flex flex-col h-full">
+        <label for="input" class="text-sm font-medium text-gray-700 mb-2">输入JSON</label>
+        <textarea 
+          id="input" 
+          class="flex-1 w-full p-4 border border-gray-300 rounded-lg editor-shadow font-mono text-sm focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none resize-none"
+          placeholder="请输入JSON内容..."
+        ></textarea>
+      </div>
+      
+      <!-- 输出区域 -->
+      <div class="flex flex-col h-full">
+        <label for="output" class="text-sm font-medium text-gray-700 mb-2">处理结果</label>
+        <textarea 
+          id="output" 
+          class="flex-1 w-full p-4 border border-gray-300 rounded-lg editor-shadow font-mono text-sm focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none resize-none"
+          placeholder="格式化/压缩后的结果将显示在这里..."
+          readonly
+        ></textarea>
+      </div>
+    </div>
+  </main>
+
+  <!-- 页脚 -->
+  <footer class="bg-white border-t border-gray-200 py-3">
+    <div class="container mx-auto px-4 text-center text-sm text-gray-500">
+      JSON格式化工具 &copy; 2023
+    </div>
+  </footer>
+
+  <script>
+    // 获取DOM元素
+    const inputTextarea = document.getElementById('input');
+    const outputTextarea = document.getElementById('output');
+    const formatBtn = document.getElementById('format');
+    const compressBtn = document.getElementById('compress');
+    const copyBtn = document.getElementById('copy');
+    const clearBtn = document.getElementById('clear');
+    const statusIndicator = document.getElementById('status-indicator');
+
+    // 显示状态消息
+    function showStatus(message, isError = false) {
+      statusIndicator.textContent = message;
+      statusIndicator.classList.remove('hidden', 'text-success', 'text-danger');
+      statusIndicator.classList.add(isError ? 'text-danger' : 'text-success');
+      
+      // 3秒后自动隐藏状态消息
+      setTimeout(() => {
+        statusIndicator.classList.add('hidden');
+      }, 3000);
+    }
+
+    /**
+     * 格式化JSON：添加缩进，便于阅读
+     */
+    formatBtn.addEventListener('click', () => {
+      try {
+        const input = inputTextarea.value.trim();
+        if (!input) {
+          showStatus('请输入JSON内容', true);
+          return;
+        }
+        
+        const parsedJSON = JSON.parse(input);
+        const formattedJSON = JSON.stringify(parsedJSON, null, 2);
+        outputTextarea.value = formattedJSON;
+        showStatus('JSON格式化成功');
+      } catch (error) {
+        // 格式化错误时使用弹窗显示详细信息
+        alert(`JSON格式错误：${error.message}`);
+      }
+    });
+
+    /**
+     * 压缩JSON：去除所有空格和换行，减小体积
+     */
+    compressBtn.addEventListener('click', () => {
+      try {
+        const input = inputTextarea.value.trim();
+        if (!input) {
+          showStatus('请输入JSON内容', true);
+          return;
+        }
+        
+        const parsedJSON = JSON.parse(input);
+        const compressedJSON = JSON.stringify(parsedJSON);
+        outputTextarea.value = compressedJSON;
+        showStatus('JSON压缩成功');
+      } catch (error) {
+        // 压缩错误时使用弹窗显示详细信息
+        alert(`JSON格式错误：${error.message}`);
+      }
+    });
+
+    /**
+     * 复制结果：将右侧输出框内容复制到剪贴板
+     */
+    copyBtn.addEventListener('click', () => {
+      const output = outputTextarea.value.trim();
+      if (!output) {
+        showStatus('没有可复制的内容', true);
+        return;
+      }
+      
+      navigator.clipboard.writeText(output)
+        .then(() => {
+          showStatus('内容已复制到剪贴板');
+        })
+        .catch((error) => {
+          showStatus(`复制失败：${error.message}`, true);
+        });
+    });
+
+    /**
+     * 清空内容：重置输入和输出框
+     */
+    clearBtn.addEventListener('click', () => {
+      inputTextarea.value = '';
+      outputTextarea.value = '';
+      showStatus('内容已清空');
+      inputTextarea.focus();
+    });
+
+    // 初始化自动聚焦到输入框
+    inputTextarea.focus();
+  </script>
+</body>
+</html>
+
