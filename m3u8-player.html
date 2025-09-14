@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Online M3U8 Player & Downloader | Free HLS Stream Tool</title>
+  <meta name="description" content="Free online M3U8 player and downloader for streaming HLS content. Easy-to-use tool for playing and downloading M3U8 video streams with real-time playback control.">
+  <meta name="keywords" content="M3U8 player, HLS player, M3U8 downloader, online video player, streaming tool, M3U8 stream, HLS streaming">
+  
+  <!-- Social Media Meta Tags -->
+  <meta property="og:title" content="Online M3U8 Player & Downloader | Free HLS Stream Tool">
+  <meta property="og:description" content="Free online M3U8 player and downloader for streaming HLS content. Play and download M3U8 video streams easily.">
+  <meta property="og:type" content="website">
+  
+  <!-- Structured Data -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "M3U8 Player & Downloader",
+      "description": "Online M3U8 streaming and download tool",
+      "applicationCategory": "MultimediaApplication",
+      "operatingSystem": "All",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "featureList": [
+        "M3U8 Stream Playback",
+        "Video Download Support",
+        "HLS Stream Processing",
+        "Real-time Playback Control"
+      ]
+    }
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/m3u8-parser@6.0.0/dist/m3u8-parser.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  
+  <!-- Tailwind Configuration -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#3b82f6',
+            secondary: '#64748b',
+            success: '#10b981',
+            danger: '#ef4444',
+            dark: '#1e293b',
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style type="text/tailwindcss">
+    @tailwind base;
+    @tailwind components;
+    @tailwind utilities;
+
+    @layer base {
+      html {
+        font-size: 16px;
+      }
+      body {
+        font-family: 'Inter', sans-serif;
+        line-height: 1.5;
+      }
+    }
+
+    @layer components {
+      .card-hover {
+        @apply transition-transform duration-200;
+      }
+      .card-hover:hover {
+        @apply transform -translate-y-1;
+      }
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col">
+  <!-- Header Navigation -->
+  <header class="bg-white shadow-sm sticky top-0 z-50">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+      <a href="#" class="flex items-center space-x-2">
+        <i class="fa fa-play-circle text-primary text-2xl"></i>
+        <h1 class="text-xl md:text-2xl font-bold text-primary">M3U8 Player</h1>
+      </a>
+      <nav class="flex space-x-6">
+        <a href="#features" class="text-gray-600 hover:text-primary transition-colors">Features</a>
+        <a href="#about" class="text-gray-600 hover:text-primary transition-colors">About</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Tool Section -->
+  <section class="py-6 bg-white">
+    <div class="container mx-auto px-4">
+      <div class="bg-white rounded-xl shadow-xl overflow-hidden">
+        <!-- Input Area -->
+        <div class="mb-6 p-6">
+          <div class="flex space-x-4">
+            <input 
+              type="text" 
+              id="m3u8-url" 
+              class="flex-1 p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none"
+              placeholder="Enter M3U8 URL..."
+            >
+            <button 
+              id="example-btn"
+              class="bg-secondary text-white px-4 py-2 rounded-md flex items-center space-x-2 hover:bg-secondary/90"
+            >
+              <i class="fa fa-file-text-o"></i>
+              <span>Try Example</span>
+            </button>
+            <button 
+              id="play-btn"
+              class="bg-primary text-white px-4 py-2 rounded-md flex items-center space-x-2 hover:bg-primary/90"
+            >
+              <i class="fa fa-play"></i>
+              <span>Play</span>
+            </button>
+            <button 
+              id="download-btn"
+              class="bg-success text-white px-4 py-2 rounded-md flex items-center space-x-2 hover:bg-success/90"
+            >
+              <i class="fa fa-download"></i>
+              <span>Download</span>
+            </button>
+          </div>
+          <div class="mt-2">
+            <span class="text-sm text-gray-500">Example URL: https://upyun.luckly-mjw.cn/Assets/media-source/example/media/index.m3u8</span>
+          </div>
+        </div>
+
+        <!-- Player Area -->
+        <div class="relative aspect-video bg-black rounded-lg overflow-hidden mx-6 mb-6">
+          <video
+            id="video-player"
+            class="w-full h-full"
+            controls
+            playsinline
+          ></video>
+        </div>
+
+        <!-- Download Progress -->
+        <div id="download-progress" class="hidden mx-6 mb-6">
+          <div class="flex items-center space-x-4">
+            <div class="flex-1">
+              <div class="h-2 bg-gray-200 rounded-full">
+                <div id="progress-bar" class="h-2 bg-success rounded-full transition-all" style="width: 0%"></div>
+              </div>
+            </div>
+            <span id="progress-text" class="text-sm text-gray-600">0%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section id="features" class="py-16 bg-gray-50">
+    <div class="container mx-auto px-4">
+      <h2 class="text-3xl font-bold text-center mb-12">Advanced M3U8 Streaming Features</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="bg-white rounded-xl p-6 shadow-md card-hover">
+          <h3 class="text-xl font-bold mb-4">HLS Stream Playback</h3>
+          <p class="text-gray-600">
+            Seamless playback of M3U8/HLS streams with advanced video controls. Support for live streaming and VOD content with adaptive bitrate streaming.
+          </p>
+        </div>
+        
+        <div class="bg-white rounded-xl p-6 shadow-md card-hover">
+          <h3 class="text-xl font-bold mb-4">Video Download</h3>
+          <p class="text-gray-600">
+            Download M3U8 streams for offline viewing. Automatically handles stream segmentation and merges segments into a single video file.
+          </p>
+        </div>
+        
+        <div class="bg-white rounded-xl p-6 shadow-md card-hover">
+          <h3 class="text-xl font-bold mb-4">Cross-Platform Support</h3>
+          <p class="text-gray-600">
+            Works on all modern browsers and devices. No plugins required. Compatible with various M3U8 stream sources and configurations.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section id="about" class="py-16 bg-white">
+    <div class="container mx-auto px-4">
+      <div class="max-w-4xl mx-auto">
+        <h2 class="text-3xl font-bold mb-6">About M3U8 Player & Downloader</h2>
+        <div class="space-y-4">
+          <p class="text-gray-600">
+            M3U8 is a file format used for streaming multimedia content, particularly in HTTP Live Streaming (HLS). Our tool provides an easy way to play and download these streams.
+          </p>
+          <p class="text-gray-600">
+            Key features of our M3U8 player include:
+          </p>
+          <ul class="list-disc list-inside text-gray-600 ml-4 space-y-2">
+            <li>Direct playback of M3U8 streams</li>
+            <li>Download capability for offline viewing</li>
+            <li>Support for various stream qualities</li>
+            <li>Progress tracking for downloads</li>
+            <li>No registration required</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section id="faq" class="py-16 bg-gray-50">
+    <div class="container mx-auto px-4">
+      <h2 class="text-3xl font-bold text-center mb-12">Frequently Asked Questions</h2>
+      <div class="max-w-4xl mx-auto space-y-6">
+        <div class="bg-white rounded-xl p-6 shadow-md">
+          <h3 class="text-xl font-bold mb-3">What is M3U8?</h3>
+          <p class="text-gray-600">M3U8 is a playlist file format used in HTTP Live Streaming (HLS). It contains URLs to video segments and is commonly used for streaming video content online.</p>
+        </div>
+        
+        <div class="bg-white rounded-xl p-6 shadow-md">
+          <h3 class="text-xl font-bold mb-3">Can I Download M3U8 Streams?</h3>
+          <p class="text-gray-600">Yes, our tool allows you to both play and download M3U8 streams. The downloader combines all video segments into a single file for easy offline viewing.</p>
+        </div>
+        
+        <div class="bg-white rounded-xl p-6 shadow-md">
+          <h3 class="text-xl font-bold mb-3">Is This Tool Free?</h3>
+          <p class="text-gray-600">Yes, this tool is completely free to use. No registration or software installation is required. Simply paste your M3U8 URL and start streaming or downloading.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-dark text-white py-8">
+    <div class="container mx-auto px-4">
+      <div class="flex justify-center items-center">
+        <div class="text-gray-400 text-sm">
+          &copy; 2024 M3U8 Player & Downloader. All rights reserved.
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Modal Dialog -->
+  <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 max-w-sm w-full mx-4 shadow-xl">
+      <div class="text-gray-800 mb-4" id="modal-content"></div>
+      <div class="flex justify-end">
+        <button onclick="closeModal()" class="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary/90">
+          OK
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript Code -->
+  <script>
+    // 获取DOM元素
+    const urlInput = document.getElementById('m3u8-url');
+    const playBtn = document.getElementById('play-btn');
+    const downloadBtn = document.getElementById('download-btn');
+    const videoPlayer = document.getElementById('video-player');
+    const modal = document.getElementById('modal');
+    const modalContent = document.getElementById('modal-content');
+    const downloadProgress = document.getElementById('download-progress');
+    const progressBar = document.getElementById('progress-bar');
+    const progressText = document.getElementById('progress-text');
+    const exampleBtn = document.getElementById('example-btn');
+
+    // 显示错误提示
+    function showModal(message) {
+      modalContent.textContent = message;
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    // 关闭错误提示
+    function closeModal() {
+      modal.classList.remove('flex');
+      modal.classList.add('hidden');
+    }
+
+    // 检查URL是否有效
+    function isValidUrl(url) {
+      try {
+        new URL(url);
+        return true;
+      } catch {
+        return false;
+      }
+    }
+
+    // 初始化HLS播放器
+    let hls = null;
+    function initPlayer(url) {
+      if (hls) {
+        hls.destroy();
+      }
+
+      if (Hls.isSupported()) {
+        hls = new Hls();
+        hls.loadSource(url);
+        hls.attachMedia(videoPlayer);
+        hls.on(Hls.Events.ERROR, function (event, data) {
+          showModal('Error loading stream: ' + data.details);
+        });
+      } else if (videoPlayer.canPlayType('application/vnd.apple.mpegurl')) {
+        videoPlayer.src = url;
+      } else {
+        showModal('Your browser does not support HLS playback');
+      }
+    }
+
+    // 播放按钮点击事件
+    playBtn.addEventListener('click', () => {
+      const url = urlInput.value.trim();
+      if (!url) {
+        showModal('Please enter M3U8 URL');
+        return;
+      }
+      if (!isValidUrl(url)) {
+        showModal('Please enter a valid URL');
+        return;
+      }
+      initPlayer(url);
+    });
+
+    // 下载功能
+    async function downloadM3U8(url) {
+      try {
+        downloadProgress.classList.remove('hidden');
+        progressBar.style.width = '0%';
+        progressText.textContent = '0%';
+
+        // 获取 m3u8 文件内容
+        const response = await fetch(url);
+        const m3u8Content = await response.text();
+        
+        // 使用 m3u8-parser 解析内容
+        const parser = new m3u8Parser.Parser();
+        parser.push(m3u8Content);
+        parser.end();
+        
+        // 获取所有视频片段
+        const baseUrl = url.substring(0, url.lastIndexOf('/') + 1);
+        const segments = parser.manifest.segments;
+        const total = segments.length;
+        let completed = 0;
+        
+        // 创建一个 Blob 用于存储所有片段
+        const chunks = [];
+        
+        // 下载每个片段
+        for (let segment of segments) {
+          try {
+            const segmentUrl = segment.uri.startsWith('http') ? segment.uri : baseUrl + segment.uri;
+            const segmentResponse = await fetch(segmentUrl);
+            const blob = await segmentResponse.blob();
+            chunks.push(blob);
+            
+            completed++;
+            const progress = Math.floor((completed / total) * 100);
+            progressBar.style.width = `${progress}%`;
+            progressText.textContent = `${progress}%`;
+          } catch (error) {
+            console.error('Error downloading segment:', error);
+          }
+        }
+        
+        // 创建并下载合并后的文件
+        const finalBlob = new Blob(chunks, { type: 'video/MP2T' });
+        const downloadUrl = URL.createObjectURL(finalBlob);
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = 'video.ts';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(downloadUrl);
+        
+        showModal('Download completed!');
+      } catch (error) {
+        showModal('Download failed: ' + error.message);
+        console.error('Download error:', error);
+      } finally {
+        downloadProgress.classList.add('hidden');
+      }
+    }
+
+    // 下载按钮点击事件
+    downloadBtn.addEventListener('click', () => {
+      const url = urlInput.value.trim();
+      if (!url) {
+        showModal('Please enter M3U8 URL');
+        return;
+      }
+      if (!isValidUrl(url)) {
+        showModal('Please enter a valid URL');
+        return;
+      }
+      downloadM3U8(url);
+    });
+
+    // 示例按钮点击事件
+    exampleBtn.addEventListener('click', () => {
+      const exampleUrl = 'https://upyun.luckly-mjw.cn/Assets/media-source/example/media/index.m3u8';
+      urlInput.value = exampleUrl;
+    });
+
+    // ESC键关闭模态框
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeModal();
+      }
+    });
+  </script>
+</body>
+</html>
