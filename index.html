@@ -3,9 +3,37 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>JSON Formatter - 在线JSON格式化与验证工具</title>
-  <meta name="description" content="免费在线JSON格式化工具，支持JSON美化、压缩与语法验证，帮助开发者快速处理JSON数据，提升工作效率。">
-  <meta name="keywords" content="JSON格式化, JSON美化, JSON压缩, JSON验证, 在线JSON工具">
+  <title>Online JSON Formatter & Validator | Free JSON Beautifier Tool</title>
+  <meta name="description" content="Free online JSON formatter and validator that helps developers beautify, validate and compress JSON data. Support both single and double quotes, with real-time syntax checking.">
+  <meta name="keywords" content="JSON formatter, JSON beautifier, JSON validator, JSON parser, JSON compression, online JSON tool, JSON editor, JSON checker">
+  
+  <!-- Social Media Meta Tags -->
+  <meta property="og:title" content="Online JSON Formatter & Validator | Free JSON Beautifier Tool">
+  <meta property="og:description" content="Free online JSON formatter and validator that helps developers beautify, validate and compress JSON data.">
+  <meta property="og:type" content="website">
+  
+  <!-- Structured Data -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "JSON Formatter & Validator",
+      "description": "Online JSON formatting and validation tool",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "All",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "featureList": [
+        "JSON Beautification",
+        "JSON Validation",
+        "JSON Compression",
+        "Support for Single and Double Quotes"
+      ]
+    }
+  </script>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
    
@@ -15,14 +43,14 @@
       theme: {
         extend: {
           colors: {
-            primary: '#4F46E5', // 靛蓝色（现代科技感）
-            secondary: '#7C3AED', // 紫色（强调色）
-            accent: '#10B981', // 翠绿色（成功/验证）
-            dark: '#1E293B',   // 深蓝灰色（文本）
-            light: '#F8FAFC'  // 浅灰色（背景）
+            primary: '#3b82f6',
+            secondary: '#64748b',
+            success: '#10b981', 
+            danger: '#ef4444',
+            dark: '#1e293b',
           },
           fontFamily: {
-            inter: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['Consolas', 'Monaco', 'Courier New', 'monospace'],
           },
         },
       }
@@ -31,133 +59,157 @@
   
   <style type="text/tailwindcss">
     @layer utilities {
-      .content-auto {
-        content-visibility: auto;
+      .editor-shadow {
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
       }
-      .text-balance {
-        text-wrap: balance;
+      .btn-hover {
+        @apply transition-all duration-200 hover:shadow-md transform hover:-translate-y-0.5;
       }
       .card-hover {
         @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
       }
-      /* 语言切换过渡效果 */
-      .lang-transition {
-        @apply transition-all duration-500 ease-in-out;
-      }
     }
   </style>
 </head>
-<body class="font-inter bg-light text-dark">
-  <!-- 顶部导航（固定） -->
+<body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col">
+  <!-- 顶部导航 -->
   <header class="bg-white shadow-sm sticky top-0 z-50">
     <div class="container mx-auto px-4 py-4 flex items-center justify-between">
       <a href="#" class="flex items-center space-x-2">
         <i class="fa fa-code text-primary text-2xl"></i>
-        <h1 class="text-xl md:text-2xl font-bold text-primary" id="header-title">JSONFormatter</h1>
+        <h1 class="text-xl md:text-2xl font-bold text-primary">JSON Formatter</h1>
       </a>
-      <nav class="hidden md:flex space-x-6">
-        <a href="#features" class="text-gray-600 hover:text-primary transition-colors" id="nav-features">Features</a>
-        <a href="#about" class="text-gray-600 hover:text-primary transition-colors" id="nav-about">About</a>
+      <nav class="flex space-x-6">
+        <a href="#features" class="text-gray-600 hover:text-primary transition-colors">Features</a>
+        <a href="#about" class="text-gray-600 hover:text-primary transition-colors">About</a>
       </nav>
-      <button class="md:hidden text-gray-600" id="mobile-menu-btn">
-        <i class="fa fa-bars text-xl"></i>
-      </button>
-    </div>
-    <!-- 移动端菜单（默认隐藏） -->
-    <div class="md:hidden hidden bg-white border-t" id="mobile-menu">
-      <div class="container mx-auto px-4 py-2 flex flex-col space-y-3">
-        <a href="#features" class="text-gray-600 hover:text-primary py-2 transition-colors" id="mobile-nav-features">Features</a>
-        <a href="#about" class="text-gray-600 hover:text-primary py-2 transition-colors" id="mobile-nav-about">About</a>
-      </div>
     </div>
   </header>
-  <!-- 工具嵌入（Iframe）- 紧跟介绍区域 -->
+
+  <!-- JSON格式化工具部分 -->
   <section class="py-6 bg-white">
     <div class="container mx-auto px-4">
       <div class="bg-white rounded-xl shadow-xl overflow-hidden">
-        <iframe 
-          src="https://mytoolsbox.cc/json.html" 
-          width="100%" 
-          height="800" 
-          frameborder="0" 
-          scrolling="auto"
-          class="w-full h-[800px] md:h-[900px] lg:h-[1000px] border-0"
-          title="JSON格式化工具"
-        ></iframe>
+        <!-- 工具栏 -->
+        <div class="bg-white border-b border-gray-200">
+          <div class="container mx-auto px-4 py-2 flex flex-wrap gap-2">
+            <button id="format" class="bg-primary text-white px-4 py-2 rounded-md flex items-center btn-hover">
+              <i class="fa fa-indent mr-2"></i>Format
+            </button>
+            <button id="compress" class="bg-secondary text-white px-4 py-2 rounded-md flex items-center btn-hover">
+              <i class="fa fa-compress mr-2"></i>Compress
+            </button>
+            <button id="copy" class="bg-success text-white px-4 py-2 rounded-md flex items-center btn-hover">
+              <i class="fa fa-copy mr-2"></i>Copy
+            </button>
+            <button id="clear" class="bg-danger text-white px-4 py-2 rounded-md flex items-center btn-hover">
+              <i class="fa fa-trash mr-2"></i>Clear
+            </button>
+          </div>
+        </div>
+
+        <!-- 主内容区 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
+          <!-- 输入区域 -->
+          <div class="flex flex-col h-[800px]">
+            <label for="input" class="text-sm font-medium text-gray-700 mb-2">Input JSON</label>
+            <textarea 
+              id="input" 
+              class="flex-1 w-full p-4 border border-gray-300 rounded-lg editor-shadow font-mono text-sm focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none resize-none"
+              placeholder="Enter your JSON here..."
+            ></textarea>
+          </div>
+          
+          <!-- 输出区域 -->
+          <div class="flex flex-col h-[800px]">
+            <label for="output" class="text-sm font-medium text-gray-700 mb-2">Result</label>
+            <textarea 
+              id="output" 
+              class="flex-1 w-full p-4 border border-gray-300 rounded-lg editor-shadow font-mono text-sm focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none resize-none"
+              placeholder="Formatted/compressed result will appear here..."
+              readonly
+            ></textarea>
+          </div>
+        </div>
       </div>
     </div>
   </section>
-  <!-- 介绍区域（中英文切换） -->
-  <section class="py-10 md:py-16 bg-gradient-to-br from-primary/5 to-secondary/5">
-    <div class="container mx-auto px-4">
-      <div class="max-w-3xl mx-auto text-center">
-        <h2 class="text-[clamp(1.8rem,4vw,2.5rem)] font-bold mb-4 text-balance lang-transition" id="hero-title">
-          JSON <span class="text-primary">Formatter</span> & Validator
-        </h2>
-        <p class="text-lg text-gray-600 mb-6 lang-transition" id="hero-desc">
-          Format, validate, and beautify your JSON data with our free online tool. Ensure your JSON is well-structured for readability and error-free integration.
-        </p>
-      </div>
-    </div>
-  </section>
 
-
-
-  <!-- 功能区域（中英文切换） -->
+  <!-- 特性介绍部分 -->
   <section id="features" class="py-16 bg-gray-50">
     <div class="container mx-auto px-4">
-      <h2 class="text-3xl font-bold text-center mb-12 lang-transition" id="features-title">Powerful Features</h2>
+      <h2 class="text-3xl font-bold text-center mb-12">Advanced JSON Processing Features</h2>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <!-- 功能卡片1：格式化 -->
         <div class="bg-white rounded-xl p-6 shadow-md card-hover">
-          <div class="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center mb-4">
-            <i class="fa fa-indent text-2xl text-primary"></i>
-          </div>
-          <h3 class="text-xl font-semibold mb-3 lang-transition" id="feature1-title">JSON Formatting</h3>
-          <p class="text-gray-600 lang-transition" id="feature1-desc">
-            Automatically format JSON with proper indentation and spacing for enhanced readability. Switch between formatted (human-friendly) and minified (compact) views in one click.
+          <h3 class="text-xl font-bold mb-4">Smart JSON Formatting</h3>
+          <p class="text-gray-600">
+            Intelligent JSON beautification with proper indentation and spacing. Supports nested structures, arrays, and complex objects. Makes JSON data human-readable while maintaining validity.
           </p>
         </div>
-
-        <!-- 功能卡片2：验证 -->
+        
         <div class="bg-white rounded-xl p-6 shadow-md card-hover">
-          <div class="w-14 h-14 bg-accent/10 rounded-full flex items-center justify-center mb-4">
-            <i class="fa fa-check-circle text-2xl text-accent"></i>
-          </div>
-          <h3 class="text-xl font-semibold mb-3 lang-transition" id="feature2-title">JSON Validation</h3>
-          <p class="text-gray-600 lang-transition" id="feature2-desc">
-            Instantly validate JSON syntax to catch errors. Receive detailed error messages with line/column references to fix issues quickly and efficiently.
+          <h3 class="text-xl font-bold mb-4">Real-time Validation</h3>
+          <p class="text-gray-600">
+            Instant syntax checking and error detection. Highlights JSON formatting issues and provides clear error messages. Ensures your JSON is always valid and properly structured.
           </p>
         </div>
-
-        <!-- 功能卡片3：压缩 -->
+        
         <div class="bg-white rounded-xl p-6 shadow-md card-hover">
-          <div class="w-14 h-14 bg-secondary/10 rounded-full flex items-center justify-center mb-4">
-            <i class="fa fa-compress text-2xl text-secondary"></i>
-          </div>
-          <h3 class="text-xl font-semibold mb-3 lang-transition" id="feature3-title">JSON Compression</h3>
-          <p class="text-gray-600 lang-transition" id="feature3-desc">
-            Minify JSON to reduce file size for faster transmission. Remove unnecessary whitespace while preserving data integrity—ideal for APIs and data storage.
+          <h3 class="text-xl font-bold mb-4">Advanced Compression</h3>
+          <p class="text-gray-600">
+            Optimize JSON for transfer by removing unnecessary whitespace. Reduce data size while maintaining complete functionality. Perfect for API responses and data storage.
           </p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- 关于区域（中英文切换） -->
+  <!-- 关于部分 -->
   <section id="about" class="py-16 bg-white">
     <div class="container mx-auto px-4">
       <div class="max-w-4xl mx-auto">
-        <h2 class="text-3xl font-bold mb-6 lang-transition" id="about-title">About Our JSON Formatter</h2>
-        <p class="text-gray-600 mb-4 lang-transition" id="about-p1">
-          JSON (JavaScript Object Notation) is fundamental for web development, API integrations, and data interchange. However, poorly formatted or invalid JSON often causes bugs, integration failures, and lost productivity.
-        </p>
-        <p class="text-gray-600 mb-4 lang-transition" id="about-p2">
-          Our JSON formatter tool simplifies this workflow: it provides an intuitive interface to format, validate, and compress JSON—whether you’re debugging API responses, preparing data for storage, or collaborating with teams.
-        </p>
-        <p class="text-gray-600 lang-transition" id="about-p3">
-          Built for performance and usability, our tool handles large JSON payloads efficiently and delivers real-time feedback. It’s designed to help developers and non-technical users alike work faster with JSON data.
-        </p>
+        <h2 class="text-3xl font-bold mb-6">About Our JSON Formatter</h2>
+        <div class="space-y-4">
+          <p class="text-gray-600">
+            JSON (JavaScript Object Notation) has become the de facto standard for data exchange in modern web development. As applications grow more complex, handling JSON data efficiently becomes crucial for developers.
+          </p>
+          <p class="text-gray-600">
+            Our JSON formatter tool is designed to streamline your JSON data handling process with features including:
+          </p>
+          <ul class="list-disc list-inside text-gray-600 ml-4 space-y-2">
+            <li>Intelligent formatting with customizable indentation</li>
+            <li>Real-time syntax validation and error detection</li>
+            <li>Support for both single and double quoted strings</li>
+            <li>One-click JSON compression for optimized data transfer</li>
+            <li>Easy copy-paste functionality for quick workflow</li>
+          </ul>
+          <p class="text-gray-600">
+            Whether you're debugging API responses, preparing configuration files, or learning about JSON structure, our tool provides a reliable, fast, and free solution for all your JSON formatting needs.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 常见问题部分 -->
+  <section id="faq" class="py-16 bg-gray-50">
+    <div class="container mx-auto px-4">
+      <h2 class="text-3xl font-bold text-center mb-12">Frequently Asked Questions</h2>
+      <div class="max-w-4xl mx-auto space-y-6">
+        <div class="bg-white rounded-xl p-6 shadow-md">
+          <h3 class="text-xl font-bold mb-3">What is JSON Formatting?</h3>
+          <p class="text-gray-600">JSON formatting is the process of structuring JSON data with proper indentation and line breaks to make it more readable. Our tool automatically formats JSON while preserving its data structure and validity.</p>
+        </div>
+        
+        <div class="bg-white rounded-xl p-6 shadow-md">
+          <h3 class="text-xl font-bold mb-3">Why Use a JSON Formatter?</h3>
+          <p class="text-gray-600">A JSON formatter helps developers read and debug JSON data more efficiently. It makes complex JSON structures easier to understand, helps identify syntax errors, and ensures data validity.</p>
+        </div>
+        
+        <div class="bg-white rounded-xl p-6 shadow-md">
+          <h3 class="text-xl font-bold mb-3">What Features Does This Tool Offer?</h3>
+          <p class="text-gray-600">Our tool provides JSON beautification, validation, and compression. It supports both single and double quotes, offers real-time syntax validation, and allows easy copying of formatted results.</p>
+        </div>
       </div>
     </div>
   </section>
@@ -165,174 +217,136 @@
   <!-- 页脚 -->
   <footer class="bg-dark text-white py-8">
     <div class="container mx-auto px-4">
-      <div class="flex flex-col md:flex-row justify-between items-center">
-        <div class="flex items-center space-x-2 mb-4 md:mb-0">
-          <i class="fa fa-code text-primary text-xl"></i>
-          <span class="text-lg font-bold" id="footer-title">JSONFormatter</span>
-        </div>
-        <div class="text-gray-400 text-sm lang-transition" id="footer-copyright">
-          &copy; 2023 JSONFormatter. All rights reserved.
-        </div>
-        <div class="flex space-x-4 mt-4 md:mt-0">
-          <a href="#" class="text-gray-400 hover:text-white transition-colors" aria-label="GitHub">
-            <i class="fa fa-github text-xl"></i>
-          </a>
-          <a href="#" class="text-gray-400 hover:text-white transition-colors" aria-label="Twitter">
-            <i class="fa fa-twitter text-xl"></i>
-          </a>
-          <a href="#" class="text-gray-400 hover:text-white transition-colors" aria-label="LinkedIn">
-            <i class="fa fa-linkedin text-xl"></i>
-          </a>
+      <div class="flex justify-center items-center">
+        <div class="text-gray-400 text-sm">
+          &copy; 2024 JSON Formatter. All rights reserved.
         </div>
       </div>
     </div>
   </footer>
 
+  <!-- 模态框部分 -->
+  <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 max-w-sm w-full mx-4 shadow-xl">
+      <div class="text-gray-800 mb-4" id="modal-content"></div>
+      <div class="flex justify-end">
+        <button onclick="closeModal()" class="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary/90">
+          OK
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script>
-    // 1. 定义中英文文本映射
-    const langTexts = {
-      en: {
-        headerTitle: "JSONFormatter",
-        navFeatures: "Features",
-        navAbout: "About",
-        mobileNavFeatures: "Features",
-        mobileNavAbout: "About",
-        heroTitle: "JSON <span class='text-primary'>Formatter</span> & Validator",
-        heroDesc: "Format, validate, and beautify your JSON data with our free online tool. Ensure your JSON is well-structured for readability and error-free integration.",
-        featuresTitle: "Powerful Features",
-        feature1Title: "JSON Formatting",
-        feature1Desc: "Automatically format JSON with proper indentation and spacing for enhanced readability. Switch between formatted (human-friendly) and minified (compact) views in one click.",
-        feature2Title: "JSON Validation",
-        feature2Desc: "Instantly validate JSON syntax to catch errors. Receive detailed error messages with line/column references to fix issues quickly and efficiently.",
-        feature3Title: "JSON Compression",
-        feature3Desc: "Minify JSON to reduce file size for faster transmission. Remove unnecessary whitespace while preserving data integrity—ideal for APIs and data storage.",
-        aboutTitle: "About Our JSON Formatter",
-        aboutP1: "JSON (JavaScript Object Notation) is fundamental for web development, API integrations, and data interchange. However, poorly formatted or invalid JSON often causes bugs, integration failures, and lost productivity.",
-        aboutP2: "Our JSON formatter tool simplifies this workflow: it provides an intuitive interface to format, validate, and compress JSON—whether you’re debugging API responses, preparing data for storage, or collaborating with teams.",
-        aboutP3: "Built for performance and usability, our tool handles large JSON payloads efficiently and delivers real-time feedback. It’s designed to help developers and non-technical users alike work faster with JSON data.",
-        footerTitle: "JSONFormatter",
-        footerCopyright: "&copy; 2023 JSONFormatter. All rights reserved."
-      },
-      zh: {
-        headerTitle: "JSON格式化工具",
-        navFeatures: "功能特性",
-        navAbout: "关于工具",
-        mobileNavFeatures: "功能特性",
-        mobileNavAbout: "关于工具",
-        heroTitle: "JSON <span class='text-primary'>格式化</span> 与验证工具",
-        heroDesc: "使用我们的免费在线工具，对JSON数据进行格式化、验证与美化。确保您的JSON结构规范，便于阅读且无集成错误。",
-        featuresTitle: "强大功能特性",
-        feature1Title: "JSON格式化",
-        feature1Desc: "自动为JSON添加规范缩进与空格，提升可读性。一键切换「易读格式」（人类友好型）与「压缩格式」（紧凑型）。",
-        feature2Title: "JSON验证",
-        feature2Desc: "实时验证JSON语法，快速定位错误。提供包含行号/列号的详细错误信息，帮助您高效修复问题。",
-        feature3Title: "JSON压缩",
-        feature3Desc: "压缩JSON以减小文件体积，提升传输速度。移除冗余空格的同时保留数据完整性——非常适合API接口与数据存储场景。",
-        aboutTitle: "关于我们的JSON格式化工具",
-        aboutP1: "JSON（JavaScript对象表示法）是Web开发、API集成与数据交换的基础格式。但格式混乱或无效的JSON常导致bug、集成失败与效率损耗。",
-        aboutP2: "我们的JSON格式化工具简化了这一流程：提供直观界面，支持JSON的格式化、验证与压缩——无论您是调试API响应、准备存储数据，还是团队协作，都能轻松应对。",
-        aboutP3: "工具兼顾性能与易用性，可高效处理大型JSON数据，并提供实时反馈。专为开发者与非技术用户设计，帮助您更高效地处理JSON数据。",
-        footerTitle: "JSON格式化工具",
-        footerCopyright: "&copy; 2023 JSON格式化工具. 保留所有权利。"
-      }
-    };
+    // 获取DOM元素
+    const inputTextarea = document.getElementById('input');
+    const outputTextarea = document.getElementById('output');
+    const formatBtn = document.getElementById('format');
+    const compressBtn = document.getElementById('compress');
+    const copyBtn = document.getElementById('copy');
+    const clearBtn = document.getElementById('clear');
+    const modal = document.getElementById('modal');
+    const modalContent = document.getElementById('modal-content');
 
-    // 2. 获取DOM元素
-    const domElements = {
-      headerTitle: document.getElementById('header-title'),
-      navFeatures: document.getElementById('nav-features'),
-      navAbout: document.getElementById('nav-about'),
-      mobileNavFeatures: document.getElementById('mobile-nav-features'),
-      mobileNavAbout: document.getElementById('mobile-nav-about'),
-      heroTitle: document.getElementById('hero-title'),
-      heroDesc: document.getElementById('hero-desc'),
-      featuresTitle: document.getElementById('features-title'),
-      feature1Title: document.getElementById('feature1-title'),
-      feature1Desc: document.getElementById('feature1-desc'),
-      feature2Title: document.getElementById('feature2-title'),
-      feature2Desc: document.getElementById('feature2-desc'),
-      feature3Title: document.getElementById('feature3-title'),
-      feature3Desc: document.getElementById('feature3-desc'),
-      aboutTitle: document.getElementById('about-title'),
-      aboutP1: document.getElementById('about-p1'),
-      aboutP2: document.getElementById('about-p2'),
-      aboutP3: document.getElementById('about-p3'),
-      footerTitle: document.getElementById('footer-title'),
-      footerCopyright: document.getElementById('footer-copyright')
-    };
-
-    // 3. 语言切换函数
-    let currentLang = 'en'; // 初始语言：英文
-    function switchLanguage() {
-      // 切换当前语言
-      currentLang = currentLang === 'en' ? 'zh' : 'en';
-      const texts = langTexts[currentLang];
-
-      // 更新所有文本（注意：heroTitle含HTML标签，用innerHTML）
-      domElements.headerTitle.textContent = texts.headerTitle;
-      domElements.navFeatures.textContent = texts.navFeatures;
-      domElements.navAbout.textContent = texts.navAbout;
-      domElements.mobileNavFeatures.textContent = texts.mobileNavFeatures;
-      domElements.mobileNavAbout.textContent = texts.mobileNavAbout;
-      domElements.heroTitle.innerHTML = texts.heroTitle; // 含span标签，用innerHTML
-      domElements.heroDesc.textContent = texts.heroDesc;
-      domElements.featuresTitle.textContent = texts.featuresTitle;
-      domElements.feature1Title.textContent = texts.feature1Title;
-      domElements.feature1Desc.textContent = texts.feature1Desc;
-      domElements.feature2Title.textContent = texts.feature2Title;
-      domElements.feature2Desc.textContent = texts.feature2Desc;
-      domElements.feature3Title.textContent = texts.feature3Title;
-      domElements.feature3Desc.textContent = texts.feature3Desc;
-      domElements.aboutTitle.textContent = texts.aboutTitle;
-      domElements.aboutP1.textContent = texts.aboutP1;
-      domElements.aboutP2.textContent = texts.aboutP2;
-      domElements.aboutP3.textContent = texts.aboutP3;
-      domElements.footerTitle.textContent = texts.footerTitle;
-      domElements.footerCopyright.innerHTML = texts.footerCopyright; // 含版权符号，用innerHTML
-
-      // 更新页面lang属性
-      document.documentElement.lang = currentLang;
+    // 显示模态框
+    function showModal(message) {
+      modalContent.textContent = message;
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
     }
 
-    // 4. 定时切换语言（间隔5秒）
-    setInterval(switchLanguage, 5000);
+    // 关闭模态框
+    function closeModal() {
+      modal.classList.remove('flex');
+      modal.classList.add('hidden');
+    }
 
-    // 5. 移动端菜单切换
-    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-    const mobileMenu = document.getElementById('mobile-menu');
-    mobileMenuBtn.addEventListener('click', () => {
-      mobileMenu.classList.toggle('hidden');
+    // 尝试解析JSON
+    function tryParseJSON(str) {
+      // 尝试直接解析
+      try {
+        return JSON.parse(str);
+      } catch (e) {
+        // 如果解析失败，尝试将单引号替换为双引号
+        try {
+          // 替换非转义的单引号为双引号
+          const converted = str.replace(/(?<!\\)'/g, '"');
+          return JSON.parse(converted);
+        } catch (error) {
+          throw error;
+        }
+      }
+    }
+
+    // 格式化JSON
+    formatBtn.addEventListener('click', () => {
+      try {
+        const input = inputTextarea.value.trim();
+        if (!input) {
+          showModal('Please enter JSON content');
+          return;
+        }
+        
+        const parsedJSON = tryParseJSON(input);
+        const formattedJSON = JSON.stringify(parsedJSON, null, 2);
+        outputTextarea.value = formattedJSON;
+      } catch (error) {
+        showModal(`JSON Error: ${error.message}`);
+      }
     });
 
-    // 6. 锚点平滑滚动
+    // 压缩JSON
+    compressBtn.addEventListener('click', () => {
+      try {
+        const input = inputTextarea.value.trim();
+        if (!input) {
+          return;
+        }
+        
+        const parsedJSON = tryParseJSON(input);
+        const compressedJSON = JSON.stringify(parsedJSON);
+        outputTextarea.value = compressedJSON;
+      } catch (error) {
+        showModal(`JSON Error: ${error.message}`);
+      }
+    });
+
+    // 复制结果
+    copyBtn.addEventListener('click', () => {
+      const output = outputTextarea.value.trim();
+      if (!output) {
+        return;
+      }
+      
+      navigator.clipboard.writeText(output);
+    });
+
+    // 清空内容
+    clearBtn.addEventListener('click', () => {
+      inputTextarea.value = '';
+      outputTextarea.value = '';
+      inputTextarea.focus();
+    });
+
+    // 平滑滚动
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
       anchor.addEventListener('click', function (e) {
         e.preventDefault();
-        const targetId = this.getAttribute('href');
-        if (targetId === '#') return;
-        
-        const targetElement = document.querySelector(targetId);
-        if (targetElement) {
-          targetElement.scrollIntoView({ behavior: 'smooth' });
-          
-          // 关闭移动端菜单（如果打开）
-          if (!mobileMenu.classList.contains('hidden')) {
-            mobileMenu.classList.add('hidden');
-          }
-        }
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+          behavior: 'smooth'
+        });
       });
     });
-  </script>
-    <div style="display:none">
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-TKT2B8TYTC"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
 
-      gtag('config', 'G-TKT2B8TYTC');
-    </script>
-  </div>
+    // 初始化聚焦
+    inputTextarea.focus();
+
+    // 添加到脚本中
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeModal();
+      }
+    });
+  </script>
 </body>
 </html>
