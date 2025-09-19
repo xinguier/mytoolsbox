@@ -1,38 +1,704 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
-    <meta charset="utf-8">
-    <title>Java Documentation</title>
-    <style>
-        .nav {
-            position: fixed;
-            left: 0;
-            top: 0;
-            width: 250px;
-            height: 100%;
-            overflow: auto;
-            background: #f1f1f1;
-            padding: 20px;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Java面试MD文档链接列表</title>
+    <!-- 引入基础样式 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    
+    <!-- 简化配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        dark: '#1E293B',
+                        light: '#F8FAFC'
+                    }
+                }
+            }
         }
-        .content {
-            margin-left: 270px;
-            padding: 20px;
-        }
-        .nav a {
-            display: block;
-            padding: 5px 0;
-            text-decoration: none;
-            color: #333;
+    </script>
+    
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .category-title { @apply text-lg font-semibold mt-6 mb-2 text-dark dark:text-light border-b pb-1 border-gray-200 dark:border-gray-700; }
+            .md-link { @apply block py-1.5 px-2 hover:bg-primary/10 rounded transition-colors text-gray-700 dark:text-gray-300 hover:text-primary; }
         }
     </style>
 </head>
-<body>
-    <div class="nav">
-        <h2>导航</h2>
-    </div>
-    <div class="content">
+<body class="bg-gray-50 dark:bg-gray-900 min-h-screen p-4 md:p-8 transition-colors duration-300">
+    <!-- 顶部标题 -->
+    <header class="mb-8 text-center">
+        <h1 class="text-2xl md:text-3xl font-bold text-dark dark:text-light mb-2">
+            <i class="fa fa-file-text-o text-primary mr-2"></i>Java面试MD文档链接
+        </h1>
+        <p class="text-gray-500 dark:text-gray-400">共收录 <span id="md-count">0</span> 个MD文档，按分类整理</p>
+    </header>
 
-    </div>
+    <!-- 主体内容：MD文件分类链接 -->
+    <main class="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 md:p-6 transition-colors duration-300">
+        <div id="md-links-container">
+            <!-- 动态生成MD文件链接 -->
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="mt-8 text-center text-sm text-gray-500 dark:text-gray-400">
+        <p>© 2024 Java面试文档库 | 仅含MD文件直接链接</p>
+    </footer>
+
+    <script>
+        // 1. MD文档目录结构（仅保留.md文件，排除其他格式）
+        const MD_DOCUMENTS = {
+            "根目录": {
+                "index.md": "index.md",
+                "IO多路复用：NIO.md": "IO多路复用：NIO.md",
+                "新增面试题.md": "新增面试题.md"
+            },
+            "ElasticSearch": {
+                "ElasticSearch为什么快？.md": "ElasticSearch/ElasticSearch为什么快？.md",
+                "Elasticsearch支持事务吗？为什么？.md": "ElasticSearch/Elasticsearch支持事务吗？为什么？.md",
+                "ES不支持decimal，如何避免丢失精度？.md": "ElasticSearch/ES不支持decimal，如何避免丢失精度？.md",
+                "ES支持乐观锁吗？如何实现的？.md": "ElasticSearch/ES支持乐观锁吗？如何实现的？.md",
+                "ES支持哪些数据类型，和MySQL之间的映射关系是怎么样的？.md": "ElasticSearch/ES支持哪些数据类型，和MySQL之间的映射关系是怎么样的？.md",
+                "倒排索引是什么？.md": "ElasticSearch/倒排索引是什么？.md",
+                "如何保证ES和数据库的数据一致性？.md": "ElasticSearch/如何保证ES和数据库的数据一致性？.md",
+                "如何优化ElasticSearch搜索性能？.md": "ElasticSearch/如何优化ElasticSearch搜索性能？.md",
+                "什么是ElasticSearch的深度分页问题？如何解决？.md": "ElasticSearch/什么是ElasticSearch的深度分页问题？如何解决？.md",
+                "为什么要使用ElasticSearch？和传统关系数据库（如MySQL）有什么不同？.md": "ElasticSearch/为什么要使用ElasticSearch？和传统关系数据库（如MySQL）有什么不同？.md"
+            },
+            "Java并发": {
+                "AQS的同步队列和条件队列原理？.md": "Java并发/AQS的同步队列和条件队列原理？.md",
+                "AQS是如何实现线程的等待和唤醒的？.md": "Java并发/AQS是如何实现线程的等待和唤醒的？.md",
+                "AQS为什么采用双向链表？.md": "Java并发/AQS为什么采用双向链表？.md",
+                "CAS一定有自旋吗？.md": "Java并发/CAS一定有自旋吗？.md",
+                "CAS在操作系统层面是如何保证原子性的？.md": "Java并发/CAS在操作系统层面是如何保证原子性的？.md",
+                "CompletableFuture的底层是如何实现的？.md": "Java并发/CompletableFuture的底层是如何实现的？.md",
+                "CountDownLatch、CyclicBarrier、Semaphore区别？.md": "Java并发/CountDownLatch、CyclicBarrier、Semaphore区别？.md",
+                "ForkJoinPool和ThreadPoolExecutor区别是什么？.md": "Java并发/ForkJoinPool和ThreadPoolExecutor区别是什么？.md",
+                "happens-before和as-if-serial有啥区别和联系？.md": "Java并发/happens-before和as-if-serial有啥区别和联系？.md",
+                "inta=1是原子性操作吗.md": "Java并发/inta=1是原子性操作吗.md",
+                "Java是如何判断一个线程是否存活的？.md": "Java并发/Java是如何判断一个线程是否存活的？.md",
+                "Java线程出现异常，进程为啥不会退出？.md": "Java并发/Java线程出现异常，进程为啥不会退出？.md",
+                "JDK21中的虚拟线程是怎么回事？.md": "Java并发/JDK21中的虚拟线程是怎么回事？.md",
+                "LongAdder和AtomicLong的区别？.md": "Java并发/LongAdder和AtomicLong的区别？.md",
+                "run_start、wait_sleep、notify_notifyAll区别_.md": "Java并发/run_start、wait_sleep、notify_notifyAll区别_.md",
+                "sychronized是非公平锁吗，那么是如何体现的？.md": "Java并发/sychronized是非公平锁吗，那么是如何体现的？.md",
+                "synchronized的锁能降级吗？.md": "Java并发/synchronized的锁能降级吗？.md",
+                "synchronized的锁升级过程是怎样的？.md": "Java并发/synchronized的锁升级过程是怎样的？.md",
+                "synchronized的锁优化是怎样的？.md": "Java并发/synchronized的锁优化是怎样的？.md",
+                "synchronized和reentrantLock区别？.md": "Java并发/synchronized和reentrantLock区别？.md",
+                "synchronized升级过程中有几次自旋？.md": "Java并发/synchronized升级过程中有几次自旋？.md",
+                "synchronized是如何保证原子性、可见性、有序性的？.md": "Java并发/synchronized是如何保证原子性、可见性、有序性的？.md",
+                "synchronized是怎么实现的？.md": "Java并发/synchronized是怎么实现的？.md",
+                "synchronized锁的是什么？.md": "Java并发/synchronized锁的是什么？.md",
+                "Thread.sleep(0)的作用是什么？.md": "Java并发/Thread.sleep(0)的作用是什么？.md",
+                "ThreadLocal的应用场景有哪些？.md": "Java并发/ThreadLocal的应用场景有哪些？.md",
+                "ThreadLocal为什么会导致内存泄漏？如何解决的？.md": "Java并发/ThreadLocal为什么会导致内存泄漏？如何解决的？.md",
+                "volatile能保证原子性吗？为什么？.md": "Java并发/volatile能保证原子性吗？为什么？.md",
+                "volatile是如何保证可见性和有序性的？.md": "Java并发/volatile是如何保证可见性和有序性的？.md",
+                "并发编程中的原子性和数据库ACID的原子性一样吗？.md": "Java并发/并发编程中的原子性和数据库ACID的原子性一样吗？.md",
+                "创建线程有几种方式？.md": "Java并发/创建线程有几种方式？.md",
+                "到底啥是内存屏障？到底怎么加的？.md": "Java并发/到底啥是内存屏障？到底怎么加的？.md",
+                "父子线程之间怎么共享_传递数据？.md": "Java并发/父子线程之间怎么共享_传递数据？.md",
+                "公平锁和非公平锁的区别？.md": "Java并发/公平锁和非公平锁的区别？.md",
+                "能不能谈谈你对线程安全的理解？.md": "Java并发/能不能谈谈你对线程安全的理解？.md",
+                "如何保证多线程下i++结果正确？.md": "Java并发/如何保证多线程下i++结果正确？.md",
+                "如何对多线程进行编排.md": "Java并发/如何对多线程进行编排.md",
+                "如何理解AQS？.md": "Java并发/如何理解AQS？.md",
+                "如何让Java的线程池顺序执行任务？.md": "Java并发/如何让Java的线程池顺序执行任务？.md",
+                "如何实现主线程捕获子线程异常.md": "Java并发/如何实现主线程捕获子线程异常.md",
+                "三个线程分别顺序打印0-100.md": "Java并发/三个线程分别顺序打印0-100.md",
+                "什么是AQS的独占模式和共享模式？.md": "Java并发/什么是AQS的独占模式和共享模式？.md",
+                "什么是CAS？存在什么问题？.md": "Java并发/什么是CAS？存在什么问题？.md",
+                "什么是happens-before原则？.md": "Java并发/什么是happens-before原则？.md",
+                "什么是Java内存模型（JMM）？.md": "Java并发/什么是Java内存模型（JMM）？.md",
+                "什么是ThreadLocal，如何实现的？.md": "Java并发/什么是ThreadLocal，如何实现的？.md",
+                "什么是Unsafe？.md": "Java并发/什么是Unsafe？.md",
+                "什么是并发，什么是并行？.md": "Java并发/什么是并发，什么是并行？.md",
+                "什么是多线程中的上下文切换？.md": "Java并发/什么是多线程中的上下文切换？.md",
+                "什么是可重入锁，怎么实现可重入锁？.md": "Java并发/什么是可重入锁，怎么实现可重入锁？.md",
+                "什么是守护线程，和普通线程有什么区别？.md": "Java并发/什么是守护线程，和普通线程有什么区别？.md",
+                "什么是死锁，如何解决？.md": "Java并发/什么是死锁，如何解决？.md",
+                "什么是线程池，如何实现的？.md": "Java并发/什么是线程池，如何实现的？.md",
+                "什么是总线嗅探和总线风暴，和JMM有什么关系？.md": "Java并发/什么是总线嗅探和总线风暴，和JMM有什么关系？.md",
+                "为什么JDK15要废弃偏向锁？.md": "Java并发/为什么JDK15要废弃偏向锁？.md",
+                "为什么不建议通过Executors构建线程池.md": "Java并发/为什么不建议通过Executors构建线程池.md",
+                "为什么不能在try-catch中捕获子线程的异常_.md": "Java并发/为什么不能在try-catch中捕获子线程的异常_.md",
+                "为什么虚拟线程不能用synchronized？.md": "Java并发/为什么虚拟线程不能用synchronized？.md",
+                "为什么虚拟线程不要和线程池一起用？.md": "Java并发/为什么虚拟线程不要和线程池一起用？.md",
+                "为什么虚拟线程尽量避免使用ThreadLocal.md": "Java并发/为什么虚拟线程尽量避免使用ThreadLocal.md",
+                "线程池的拒绝策略有哪些？.md": "Java并发/线程池的拒绝策略有哪些？.md",
+                "线程是如何被调度的？.md": "Java并发/线程是如何被调度的？.md",
+                "线程数设定成多少更合适？.md": "Java并发/线程数设定成多少更合适？.md",
+                "线程同步的方式有哪些？.md": "Java并发/线程同步的方式有哪些？.md",
+                "线程有几种状态，状态之间的流转是怎样的？.md": "Java并发/线程有几种状态，状态之间的流转是怎样的？.md",
+                "有了CAS为啥还需要volatile？.md": "Java并发/有了CAS为啥还需要volatile？.md",
+                "有了InheritableThreadLocal为啥还需要TransmittableThreadLocal？.md": "Java并发/有了InheritableThreadLocal为啥还需要TransmittableThreadLocal？.md",
+                "有了MESI为啥还需要JMM？.md": "Java并发/有了MESI为啥还需要JMM？.md",
+                "有了synchronized为什么还需要volatile_.md": "Java并发/有了synchronized为什么还需要volatile_.md",
+                "有哪些实现线程安全的方案_.md": "Java并发/有哪些实现线程安全的方案_.md",
+                "有三个线程T1,T2,T3如何保证顺序执行？.md": "Java并发/有三个线程T1,T2,T3如何保证顺序执行？.md"
+            },
+            
+           
+          
+            "MyBatis": {
+                "#和$的区别是什么？什么情况必须用$.md": "MyBatis/#和$的区别是什么？什么情况必须用$.md",
+                "MyBatis-Plus的分页原理是什么？.md": "MyBatis/MyBatis-Plus的分页原理是什么？.md",
+                "MyBatis-Plus有什么用？.md": "MyBatis/MyBatis-Plus有什么用？.md",
+                "Mybatis插件的运行原理？.md": "MyBatis/Mybatis插件的运行原理？.md",
+                "Mybatis的工作原理？.md": "MyBatis/Mybatis的工作原理？.md",
+                "Mybatis的缓存机制.md": "MyBatis/Mybatis的缓存机制.md",
+                "Mybatis的优点有哪些？.md": "MyBatis/Mybatis的优点有哪些？.md",
+                "Mybatis可以实现动态SQL么？.md": "MyBatis/Mybatis可以实现动态SQL么？.md",
+                "Mybatis是否支持延迟加载？实现原理是什么？.md": "MyBatis/Mybatis是否支持延迟加载？实现原理是什么？.md",
+                "Mybatis是如何实现字段映射的？.md": "MyBatis/Mybatis是如何实现字段映射的？.md",
+                "Mybatis用的什么连接池？.md": "MyBatis/Mybatis用的什么连接池？.md",
+                "MyBatis与Hibernate有何不同？.md": "MyBatis/MyBatis与Hibernate有何不同？.md",
+                "PageHelper分页的原理是什么？.md": "MyBatis/PageHelper分页的原理是什么？.md",
+                "RowBounds分页的原理是什么？.md": "MyBatis/RowBounds分页的原理是什么？.md",
+                "什么是ORM，有哪些常用框架？.md": "MyBatis/什么是ORM，有哪些常用框架？.md",
+                "使用MyBatis如何实现分页？.md": "MyBatis/使用MyBatis如何实现分页？.md"
+            },
+            
+            "Oracle": {
+                "Oracle的事务隔离级别？.md": "Oracle/Oracle的事务隔离级别？.md",
+                "Oracle和MySQL的区别是什么？如何选择？.md": "Oracle/Oracle和MySQL的区别是什么？如何选择？.md",
+                "Oracle支持哪些索引类型？.md": "Oracle/Oracle支持哪些索引类型？.md",
+                "阿里巴巴的去IOE架构中为什么废弃Oracle.md": "Oracle/阿里巴巴的去IOE架构中为什么废弃Oracle.md",
+                "介绍下函数索引、位图索引、空间索引？.md": "Oracle/介绍下函数索引、位图索引、空间索引？.md",
+                "什么是反向键索引，有什么用处？.md": "Oracle/什么是反向键索引，有什么用处？.md",
+                "什么是视图，视图的作用是什么？.md": "Oracle/什么是视图，视图的作用是什么？.md"
+            },
+            
+            "Redis": {
+                "Redis5.0中的Stream是什么？.md": "Redis/Redis5.0中的Stream是什么？.md",
+                "RedisCluster中使用事务和lua有什么限制？.md": "Redis/RedisCluster中使用事务和lua有什么限制？.md",
+                "Redisson的lock和tryLock有什么区别？.md": "Redis/Redisson的lock和tryLock有什么区别？.md",
+                "Redisson的watchdog机制是怎么样的？.md": "Redis/Redisson的watchdog机制是怎么样的？.md",
+                "Redisson的watchdog什么情况下可能会失效？.md": "Redis/Redisson的watchdog什么情况下可能会失效？.md",
+                "Redisson和Jedis有啥区别？如何选择？.md": "Redis/Redisson和Jedis有啥区别？如何选择？.md",
+                "Redisson如何保证解锁的线程一定是加锁的线程？.md": "Redis/Redisson如何保证解锁的线程一定是加锁的线程？.md",
+                "Redisson中为什么要废弃RedLock，该用啥？.md": "Redis/Redisson中为什么要废弃RedLock，该用啥？.md",
+                "Redis的Key和Value的设计原则有哪些？.md": "Redis/Redis的Key和Value的设计原则有哪些？.md",
+                "Redis的持久化机制是怎样的？.md": "Redis/Redis的持久化机制是怎样的？.md",
+                "Redis的过期策略是怎么样的？.md": "Redis/Redis的过期策略是怎么样的？.md",
+                "Redis的内存淘汰策略是怎么样的？.md": "Redis/Redis的内存淘汰策略是怎么样的？.md",
+                "Redis的事务和Lua之间有哪些区别？.md": "Redis/Redis的事务和Lua之间有哪些区别？.md",
+                "Redis的事务机制是怎样的？.md": "Redis/Redis的事务机制是怎样的？.md",
+                "Redis的虚拟内存机制是什么？.md": "Redis/Redis的虚拟内存机制是什么？.md",
+                "Redis如何高效安全的遍历所有key.md": "Redis/Redis如何高效安全的遍历所有key.md",
+                "Redis如何实现发布_订阅？.md": "Redis/Redis如何实现发布_订阅？.md",
+                "Redis如何实现延迟消息？.md": "Redis/Redis如何实现延迟消息？.md",
+                "Redis实现分布锁的时候，哪些问题需要考虑？.md": "Redis/Redis实现分布锁的时候，哪些问题需要考虑？.md",
+                "Redis使用什么协议进行通信？.md": "Redis/Redis使用什么协议进行通信？.md",
+                "Redis是AP的还是CP的？.md": "Redis/Redis是AP的还是CP的？.md",
+                "Redis为什么被设计成是单线程的？.md": "Redis/Redis为什么被设计成是单线程的？.md",
+                "Redis为什么要自己定义SDS？.md": "Redis/Redis为什么要自己定义SDS？.md",
+                "Redis为什么这么快？.md": "Redis/Redis为什么这么快？.md",
+                "Redis与Memcached有什么区别？.md": "Redis/Redis与Memcached有什么区别？.md",
+                "Redis支持哪几种数据类型？.md": "Redis/Redis支持哪几种数据类型？.md",
+                "Redis中key过期了一定会立即删除吗.md": "Redis/Redis中key过期了一定会立即删除吗.md",
+                "Redis中的setnx命令为什么是原子性的.md": "Redis/Redis中的setnx命令为什么是原子性的.md",
+                "Redis中的Zset是怎么实现的？.md": "Redis/Redis中的Zset是怎么实现的？.md",
+                "Redis中有一批key瞬间过期，为什么其它key的读写效率会降低？.md": "Redis/Redis中有一批key瞬间过期，为什么其它key的读写效率会降低？.md",
+                "watchdog解锁失败，会不会导致一直续期下去？.md": "Redis/watchdog解锁失败，会不会导致一直续期下去？.md",
+                "watchdog一直续期，那客户端挂了怎么办？.md": "Redis/watchdog一直续期，那客户端挂了怎么办？.md",
+                "除了做缓存，Redis还能用来干什么？.md": "Redis/除了做缓存，Redis还能用来干什么？.md",
+                "对于Redis的操作，有哪些推荐的BestPractices？.md": "Redis/对于Redis的操作，有哪些推荐的BestPractices？.md",
+                "介绍下Redis集群的脑裂问题？.md": "Redis/介绍下Redis集群的脑裂问题？.md",
+                "介绍一下Redis的集群模式？.md": "Redis/介绍一下Redis的集群模式？.md",
+                "如何基于Redisson实现一个延迟队列.md": "Redis/如何基于Redisson实现一个延迟队列.md",
+                "如何基于Redis实现滑动窗口限流？.md": "Redis/如何基于Redis实现滑动窗口限流？.md",
+                "如何解决Redis和数据库的一致性问题？.md": "Redis/如何解决Redis和数据库的一致性问题？.md",
+                "如何用Redisson实现分布式锁？.md": "Redis/如何用Redisson实现分布式锁？.md",
+                "如何用Redis实现乐观锁？.md": "Redis/如何用Redis实现乐观锁？.md",
+                "如何用SETNX实现分布式锁？.md": "Redis/如何用SETNX实现分布式锁？.md",
+                "如何用setnx实现一个可重入锁？.md": "Redis/如何用setnx实现一个可重入锁？.md",
+                "如何在RedisCluster中执行lua脚本？.md": "Redis/如何在RedisCluster中执行lua脚本？.md",
+                "什么情况下会出现数据库和缓存不一致的问题？.md": "Redis/什么情况下会出现数据库和缓存不一致的问题？.md",
+                "什么是GEO，有什么用？.md": "Redis/什么是GEO，有什么用？.md",
+                "什么是Redis的Pipeline，和事务有什么区别？.md": "Redis/什么是Redis的Pipeline，和事务有什么区别？.md",
+                "什么是Redis的渐进式rehash.md": "Redis/什么是Redis的渐进式rehash.md",
+                "什么是Redis的数据分片？.md": "Redis/什么是Redis的数据分片？.md",
+                "什么是RedLock，他解决了什么问题？.md": "Redis/什么是RedLock，他解决了什么问题？.md",
+                "什么是大Key问题，如何解决？.md": "Redis/什么是大Key问题，如何解决？.md",
+                "什么是缓存击穿、缓存穿透、缓存雪崩？.md": "Redis/什么是缓存击穿、缓存穿透、缓存雪崩？.md",
+                "什么是热Key问题，如何解决热key问题.md": "Redis/什么是热Key问题，如何解决热key问题.md",
+                "为什么Lua脚本可以保证原子性？.md": "Redis/为什么Lua脚本可以保证原子性？.md",
+                "为什么Redis6.0引入了多线程？.md": "Redis/为什么Redis6.0引入了多线程？.md",
+                "为什么Redis不支持回滚？.md": "Redis/为什么Redis不支持回滚？.md",
+                "为什么Redis设计成单线程也能这么快？.md": "Redis/为什么Redis设计成单线程也能这么快？.md",
+                "为什么ZSet既能支持高效的范围查询，还能以O(1)复杂度获取元素权重值？.md": "Redis/为什么ZSet既能支持高效的范围查询，还能以O(1)复杂度获取元素权重值？.md",
+                "为什么需要延迟双删，两次删除的原因是什么？.md": "Redis/为什么需要延迟双删，两次删除的原因是什么？.md"
+            },
+            
+            "本地缓存": {
+                "LRU和LFU有啥区别？.md": "本地缓存/LRU和LFU有啥区别？.md",
+                "本地缓存和分布式缓存有什么区别？.md": "本地缓存/本地缓存和分布式缓存有什么区别？.md",
+                "你知道哪些缓存失效算法？.md": "本地缓存/你知道哪些缓存失效算法？.md",
+                "如何保证本地缓存的一致性？.md": "本地缓存/如何保证本地缓存的一致性？.md",
+                "如何实现本地缓存？.md": "本地缓存/如何实现本地缓存？.md",
+                "如何实现多级缓存？.md": "本地缓存/如何实现多级缓存？.md"
+            },
+            "Java基础": {
+                "Arrays.sort是使用什么排序算法实现的？.md": "Java基础/Arrays.sort是使用什么排序算法实现的？.md",
+                "BigDecimal(double)和BigDecimal(String)有什么区别？.md": "Java基础/BigDecimal(double)和BigDecimal(String)有什么区别？.md",
+                "BigDecimal和Long表示金额哪个更合适，怎么选择？.md": "Java基础/BigDecimal和Long表示金额哪个更合适，怎么选择？.md",
+                "char能存储中文吗？.md": "Java基础/char能存储中文吗？.md",
+                "ClassNotFoundException和NoClassDefFoundError的区别是什么？.md": "Java基础/ClassNotFoundException和NoClassDefFoundError的区别是什么？.md",
+                "final、finally、finalize有什么区别.md": "Java基础/final、finally、finalize有什么区别.md",
+                "finally中代码一定会执行吗？.md": "Java基础/finally中代码一定会执行吗？.md",
+                "Java的动态代理如何实现？.md": "Java基础/Java的动态代理如何实现？.md",
+                "Java和C++主要区别有哪些？各有哪些优缺点？.md": "Java基础/Java和C++主要区别有哪些？各有哪些优缺点？.md",
+                "Java是值传递还是引用传递？.md": "Java基础/Java是值传递还是引用传递？.md",
+                "Java序列化的原理是啥.md": "Java基础/Java序列化的原理是啥.md",
+                "Java中Timer实现定时调度的原理是什么？.md": "Java基础/Java中Timer实现定时调度的原理是什么？.md",
+                "Java中创建对象有哪些种方式.md": "Java基础/Java中创建对象有哪些种方式.md",
+                "Java中的static都能用来修饰什么？.md": "Java基础/Java中的static都能用来修饰什么？.md",
+                "Java中的枚举有什么特点和好处.md": "Java基础/Java中的枚举有什么特点和好处.md",
+                "Java中异常分哪两类，有什么区别？.md": "Java基础/Java中异常分哪两类，有什么区别？.md",
+                "Java中有了基本类型为什么还需要包装类？.md": "Java基础/Java中有了基本类型为什么还需要包装类？.md",
+                "Java注解的作用是啥.md": "Java基础/Java注解的作用是啥.md",
+                "JDK9中对字符串的拼接做了什么优化？.md": "Java基础/JDK9中对字符串的拼接做了什么优化？.md",
+                "JDK新版本中都有哪些新特性？.md": "Java基础/JDK新版本中都有哪些新特性？.md",
+                "Lambda表达式是如何实现的？.md": "Java基础/Lambda表达式是如何实现的？.md",
+                "RPC接口返回中，使用基本类型还是包装类？.md": "Java基础/RPC接口返回中，使用基本类型还是包装类？.md",
+                "serialVersionUID有何用途_如果没定义会有什么问题？.md": "Java基础/serialVersionUID有何用途_如果没定义会有什么问题？.md",
+                "SimpleDateFormat是线程安全的吗？使用时应该注意什么？.md": "Java基础/SimpleDateFormat是线程安全的吗？使用时应该注意什么？.md",
+                "Stream的并行流一定比串行流更快吗？.md": "Java基础/Stream的并行流一定比串行流更快吗？.md",
+                "Stringa=_ab_;Stringb=_a_+_b_;a==b吗？.md": "Java基础/Stringa=_ab_;Stringb=_a_+_b_;a==b吗？.md",
+                "Stringstr=newString(_hollis_)创建了几个对象？.md": "Java基础/Stringstr=newString(_hollis_)创建了几个对象？.md",
+                "String、StringBuilder和StringBuffer的区别？.md": "Java基础/String、StringBuilder和StringBuffer的区别？.md",
+                "String是如何实现不可变的？.md": "Java基础/String是如何实现不可变的？.md",
+                "String为什么设计成不可变的？.md": "Java基础/String为什么设计成不可变的？.md",
+                "String有长度限制吗？是多少？.md": "Java基础/String有长度限制吗？是多少？.md",
+                "String中intern的原理是什么？.md": "Java基础/String中intern的原理是什么？.md",
+                "try中returnA，catch中returnB，finally中returnC，最终返回值是什么？.md": "Java基础/try中returnA，catch中returnB，finally中returnC，最终返回值是什么？.md",
+                "while(true)和for(;;)哪个性能好？.md": "Java基础/while(true)和for(;;)哪个性能好？.md",
+                "常见的字符编码有哪些？有什么区别？.md": "Java基础/常见的字符编码有哪些？有什么区别？.md",
+                "泛型中KTVE？Object等分别代表什么含义。.md": "Java基础/泛型中KTVE？Object等分别代表什么含义。.md",
+                "泛型中上下界限定符extends和super有什么区别？.md": "Java基础/泛型中上下界限定符extends和super有什么区别？.md",
+                "接口和抽象类的区别，如何选择？.md": "Java基础/接口和抽象类的区别，如何选择？.md",
+                "你知道fastjson的反序列化漏洞吗.md": "Java基础/你知道fastjson的反序列化漏洞吗.md",
+                "如何理解Java中的多态？.md": "Java基础/如何理解Java中的多态？.md",
+                "如何理解面向对象和面向过程？.md": "Java基础/如何理解面向对象和面向过程？.md",
+                "什么是AIO、BIO和NIO？.md": "Java基础/什么是AIO、BIO和NIO？.md",
+                "什么是SPI，和API有啥区别.md": "Java基础/什么是SPI，和API有啥区别.md",
+                "什么是UUID，能保证唯一吗？.md": "Java基础/什么是UUID，能保证唯一吗？.md",
+                "什么是反射机制？为什么反射慢？.md": "Java基础/什么是反射机制？为什么反射慢？.md",
+                "什么是泛型？有什么好处？.md": "Java基础/什么是泛型？有什么好处？.md",
+                "什么是类型擦除？.md": "Java基础/什么是类型擦除？.md",
+                "什么是深拷贝和浅拷贝？.md": "Java基础/什么是深拷贝和浅拷贝？.md",
+                "什么是序列化与反序列化.md": "Java基础/什么是序列化与反序列化.md",
+                "说几个常见的语法糖？.md": "Java基础/说几个常见的语法糖？.md",
+                "为什么Java不支持多继承？.md": "Java基础/为什么Java不支持多继承？.md",
+                "为什么Java中的main方法必须是publicstaticvoid的？.md": "Java基础/为什么Java中的main方法必须是publicstaticvoid的？.md",
+                "为什么JDK9中把String的char[]改成了byte[]？.md": "Java基础/为什么JDK9中把String的char[]改成了byte[]？.md",
+                "为什么不建议使用异常控制业务流程.md": "Java基础/为什么不建议使用异常控制业务流程.md",
+                "为什么不能用BigDecimal的equals方法做等值比较？.md": "Java基础/为什么不能用BigDecimal的equals方法做等值比较？.md",
+                "为什么不能用浮点数表示金额？.md": "Java基础/为什么不能用浮点数表示金额？.md",
+                "为什么对Java中的负数取绝对值结果不一定是正数？.md": "Java基础/为什么对Java中的负数取绝对值结果不一定是正数？.md",
+                "为什么建议多用组合少用继承？.md": "Java基础/为什么建议多用组合少用继承？.md",
+                "为什么建议自定义一个无参构造函数.md": "Java基础/为什么建议自定义一个无参构造函数.md",
+                "为什么这段代码在JDK不同版本中结果不同.md": "Java基础/为什么这段代码在JDK不同版本中结果不同.md",
+                "现在JDK的最新版本是什么？.md": "Java基础/现在JDK的最新版本是什么？.md",
+                "以下关于异常处理的代码有哪些问题.md": "Java基础/以下关于异常处理的代码有哪些问题.md",
+                "有了equals为啥需要hashCode方法？.md": "Java基础/有了equals为啥需要hashCode方法？.md",
+                "怎么修改一个类中的private修饰的String参数的值.md": "Java基础/怎么修改一个类中的private修饰的String参数的值.md",
+                "字符串常量是什么时候进入到字符串常量池的？.md": "Java基础/字符串常量是什么时候进入到字符串常量池的？.md"
+            },
+            "JVM": {
+                "FullGC多久一次算正常？.md": "JVM/FullGC多久一次算正常？.md",
+                "G1和CMS有什么区别？.md": "JVM/G1和CMS有什么区别？.md",
+                "Java8和Java11的GC有什么区别？.md": "JVM/Java8和Java11的GC有什么区别？.md",
+                "Java的堆是如何分代的？为什么分代？.md": "JVM/Java的堆是如何分代的？为什么分代？.md",
+                "Java发生了OOM一定会导致JVM退出吗？.md": "JVM/Java发生了OOM一定会导致JVM退出吗？.md",
+                "Java是编译型还是解释型_.md": "JVM/Java是编译型还是解释型_.md",
+                "Java是如何实现的平台无关？.md": "JVM/Java是如何实现的平台无关？.md",
+                "Java一定就是平台无关的吗？.md": "JVM/Java一定就是平台无关的吗？.md",
+                "Java中的对象一定在堆上分配内存吗？.md": "JVM/Java中的对象一定在堆上分配内存吗？.md",
+                "Java中的类什么时候会被加载？.md": "JVM/Java中的类什么时候会被加载？.md",
+                "Java中类加载的过程是怎么样的？.md": "JVM/Java中类加载的过程是怎么样的？.md",
+                "JDK1.8和1.9中类加载器有哪些不同.md": "JVM/JDK1.8和1.9中类加载器有哪些不同.md",
+                "JDK11中新出的ZGC有什么特点？.md": "JVM/JDK11中新出的ZGC有什么特点？.md",
+                "JVM的运行时内存区域是怎样的？.md": "JVM/JVM的运行时内存区域是怎样的？.md",
+                "JVM如何保证给对象分配内存过程的线程安全？.md": "JVM/JVM如何保证给对象分配内存过程的线程安全？.md",
+                "JVM如何判断对象是否存活？.md": "JVM/JVM如何判断对象是否存活？.md",
+                "JVM是如何创建对象的？.md": "JVM/JVM是如何创建对象的？.md",
+                "JVM为什么要把堆和栈区分出来呢？.md": "JVM/JVM为什么要把堆和栈区分出来呢？.md",
+                "JVM有哪些垃圾回收算法？.md": "JVM/JVM有哪些垃圾回收算法？.md",
+                "JVM中一次完整的GC流程是怎样的？.md": "JVM/JVM中一次完整的GC流程是怎样的？.md",
+                "OutOfMemory和StackOverflow的区别是什么.md": "JVM/OutOfMemory和StackOverflow的区别是什么.md",
+                "YoungGC和FullGC的触发条件是什么？.md": "JVM/YoungGC和FullGC的触发条件是什么？.md",
+                "常见的JVM工具有哪些.md": "JVM/常见的JVM工具有哪些.md",
+                "对JDK进程执行kill-9有什么影响？.md": "JVM/对JDK进程执行kill-9有什么影响？.md",
+                "简单介绍一下JIT优化技术？.md": "JVM/简单介绍一下JIT优化技术？.md",
+                "介绍下CMS的垃圾回收过程.md": "JVM/介绍下CMS的垃圾回收过程.md",
+                "类的生命周期是怎么样的？.md": "JVM/类的生命周期是怎么样的？.md",
+                "哪些语言有GC机制.md": "JVM/哪些语言有GC机制.md",
+                "内存泄漏和内存溢出的区别是什么？.md": "JVM/内存泄漏和内存溢出的区别是什么？.md",
+                "破坏双亲委派之后，能重写String类吗？.md": "JVM/破坏双亲委派之后，能重写String类吗？.md",
+                "如何判断JVM中类和其他类是不是同一个类？.md": "JVM/如何判断JVM中类和其他类是不是同一个类？.md",
+                "什么情况会导致JVM退出？.md": "JVM/什么情况会导致JVM退出？.md",
+                "什么是AOT编译？和JIT有啥区别？.md": "JVM/什么是AOT编译？和JIT有啥区别？.md",
+                "什么是Class常量池，和运行时常量池关系是什么？.md": "JVM/什么是Class常量池，和运行时常量池关系是什么？.md",
+                "什么是safepoint，有啥用？.md": "JVM/什么是safepoint，有啥用？.md",
+                "什么是StopTheWorld？.md": "JVM/什么是StopTheWorld？.md",
+                "什么是STW？有什么影响？.md": "JVM/什么是STW？有什么影响？.md",
+                "什么是编译和反编译？.md": "JVM/什么是编译和反编译？.md",
+                "什么是堆外内存？如何使用堆外内存？.md": "JVM/什么是堆外内存？如何使用堆外内存？.md",
+                "什么是方法区？是如何实现的？.md": "JVM/什么是方法区？是如何实现的？.md",
+                "什么是跨代引用，有什么问题？.md": "JVM/什么是跨代引用，有什么问题？.md",
+                "什么是强引用、软引用、弱引用和虚引用？.md": "JVM/什么是强引用、软引用、弱引用和虚引用？.md",
+                "什么是三色标记算法？.md": "JVM/什么是三色标记算法？.md",
+                "什么是双亲委派？如何破坏？.md": "JVM/什么是双亲委派？如何破坏？.md",
+                "什么是逃逸分析？.md": "JVM/什么是逃逸分析？.md",
+                "说一说JVM的并发回收和并行回收.md": "JVM/说一说JVM的并发回收和并行回收.md",
+                "为什么G1从JDK9之后成为默认的垃圾回收器？.md": "JVM/为什么G1从JDK9之后成为默认的垃圾回收器？.md",
+                "为什么初始标记和重新标记需要STW，而并发标记不需要？.md": "JVM/为什么初始标记和重新标记需要STW，而并发标记不需要？.md",
+                "项目中如何选择垃圾回收器？为啥选择这个？.md": "JVM/项目中如何选择垃圾回收器？为啥选择这个？.md",
+                "新生代和老年代的GC算法.md": "JVM/新生代和老年代的GC算法.md",
+                "新生代和老年代的垃圾回收器有何区别？.md": "JVM/新生代和老年代的垃圾回收器有何区别？.md",
+                "新生代如果只有一个Eden+一个Survivor可以吗？.md": "JVM/新生代如果只有一个Eden+一个Survivor可以吗？.md",
+                "虚拟机中的堆一定是线程共享的吗？.md": "JVM/虚拟机中的堆一定是线程共享的吗？.md",
+                "一个Java进程占用的内存都哪些部分？.md": "JVM/一个Java进程占用的内存都哪些部分？.md",
+                "一个对象的结构是什么样的？.md": "JVM/一个对象的结构是什么样的？.md",
+                "有哪些常用的JVM启动参数？.md": "JVM/有哪些常用的JVM启动参数？.md",
+                "运行时常量池和字符串常量池的关系是什么？.md": "JVM/运行时常量池和字符串常量池的关系是什么？.md",
+                "字符串常量池是如何实现的？.md": "JVM/字符串常量池是如何实现的？.md"
+            },
+            "Kafka": {
+                "Kafka、ActiveMQ、RabbitMQ和RocketMQ都有哪些区别？.md": "Kafka/Kafka、ActiveMQ、RabbitMQ和RocketMQ都有哪些区别？.md",
+                "Kafka的架构是怎么样的？.md": "Kafka/Kafka的架构是怎么样的？.md",
+                "Kafka高水位了解过吗？为什么Kafka需要LeaderEpoch？.md": "Kafka/Kafka高水位了解过吗？为什么Kafka需要LeaderEpoch？.md",
+                "Kafka几种选举过程简单介绍一下？.md": "Kafka/Kafka几种选举过程简单介绍一下？.md",
+                "Kafka如何保证消息不丢失？.md": "Kafka/Kafka如何保证消息不丢失？.md",
+                "Kafka如何实现顺序消费？.md": "Kafka/Kafka如何实现顺序消费？.md",
+                "Kafka为什么有Topic还要用Partition_.md": "Kafka/Kafka为什么有Topic还要用Partition_.md",
+                "Kafka为什么这么快？.md": "Kafka/Kafka为什么这么快？.md",
+                "Kafka消息的发送过程简单介绍一下？.md": "Kafka/Kafka消息的发送过程简单介绍一下？.md",
+                "Kafka怎么保证消费只消费一次的_.md": "Kafka/Kafka怎么保证消费只消费一次的_.md",
+                "介绍一下Kafka的ISR机制？.md": "Kafka/介绍一下Kafka的ISR机制？.md",
+                "什么是Kafka的重平衡机制？.md": "Kafka/什么是Kafka的重平衡机制？.md",
+                "为什么Kafka没办法100%保证消息不丢失？.md": "Kafka/为什么Kafka没办法100%保证消息不丢失？.md",
+                "为什么要使用消息队列？.md": "Kafka/为什么要使用消息队列？.md"
+            },
+            
+            "MySQL": {
+                "A,B,C的联合索引，按照AB,AC,BC查询，能走索引吗？.md": "MySQL/A,B,C的联合索引，按照AB,AC,BC查询，能走索引吗？.md",
+                "a,b两个单独索引，wherea=xxandb=xx走哪个索引？为什么？.md": "MySQL/a,b两个单独索引，wherea=xxandb=xx走哪个索引？为什么？.md",
+                "binlog、redolog和undolog区别？.md": "MySQL/binlog、redolog和undolog区别？.md",
+                "bufferpool的读写过程是怎么样的？.md": "MySQL/bufferpool的读写过程是怎么样的？.md",
+                "char和varchar的区别？.md": "MySQL/char和varchar的区别？.md",
+                "count(1)、count(_)与count(列名)的区别.md": "MySQL/count(1)、count(_)与count(列名)的区别.md",
+                "Innodb的RR到底有没有解决幻读？.md": "MySQL/Innodb的RR到底有没有解决幻读？.md",
+                "InnoDB的一次更新事务是怎么实现的？.md": "MySQL/InnoDB的一次更新事务是怎么实现的？.md",
+                "InnoDB和MyISAM有什么区别？.md": "MySQL/InnoDB和MyISAM有什么区别？.md",
+                "Innodb加索引，这个时候会锁表吗？.md": "MySQL/Innodb加索引，这个时候会锁表吗？.md",
+                "InnoDB如何解决脏读、不可重复读和幻读的？.md": "MySQL/InnoDB如何解决脏读、不可重复读和幻读的？.md",
+                "InnoDB为什么使用B+树实现索引？.md": "MySQL/InnoDB为什么使用B+树实现索引？.md",
+                "InnoDB支持哪几种行格式？.md": "MySQL/InnoDB支持哪几种行格式？.md",
+                "InnoDB中的表级锁、页级锁、行级锁？.md": "MySQL/InnoDB中的表级锁、页级锁、行级锁？.md",
+                "InnoDB中的索引类型？.md": "MySQL/InnoDB中的索引类型？.md",
+                "limit0,100和limit10000000,100一样吗？.md": "MySQL/limit0,100和limit10000000,100一样吗？.md",
+                "MyISAM的索引结构是怎么样的，它存在的问题是什么？.md": "MySQL/MyISAM的索引结构是怎么样的，它存在的问题是什么？.md",
+                "MySQL5.x和8.0有什么区别？.md": "MySQL/MySQL5.x和8.0有什么区别？.md",
+                "MySQL的binlog有几种格式.md": "MySQL/MySQL的binlog有几种格式.md",
+                "MySQL的BLOB和TEXT有什么区别_.md": "MySQL/MySQL的BLOB和TEXT有什么区别_.md",
+                "MySQL的HashJoin是什么？.md": "MySQL/MySQL的HashJoin是什么？.md",
+                "MySQL的limit+orderby为什么会数据重复？.md": "MySQL/MySQL的limit+orderby为什么会数据重复？.md",
+                "MySQL的select_会用到事务吗？.md": "MySQL/MySQL的select_会用到事务吗？.md",
+                "MySQL的并行复制原理.md": "MySQL/MySQL的并行复制原理.md",
+                "MySQL的驱动表是什么？MySQL怎么选的？.md": "MySQL/MySQL的驱动表是什么？MySQL怎么选的？.md",
+                "MySQL的深度分页如何优化.md": "MySQL/MySQL的深度分页如何优化.md",
+                "MySQL的数据存储一定是基于硬盘的吗？.md": "MySQL/MySQL的数据存储一定是基于硬盘的吗？.md",
+                "MySQL的行级锁锁的到底是什么？.md": "MySQL/MySQL的行级锁锁的到底是什么？.md",
+                "MySQL的优化器的索引成本是怎么算出来的？.md": "MySQL/MySQL的优化器的索引成本是怎么算出来的？.md",
+                "MySQL的主键一定是自增的吗？.md": "MySQL/MySQL的主键一定是自增的吗？.md",
+                "MySQL获取主键id的瓶颈在哪里？如何优化？.md": "MySQL/MySQL获取主键id的瓶颈在哪里？如何优化？.md",
+                "MySQL是AP的还是CP的系统？.md": "MySQL/MySQL是AP的还是CP的系统？.md",
+                "MySQL是如何保证唯一性索引的唯一性的？.md": "MySQL/MySQL是如何保证唯一性索引的唯一性的？.md",
+                "MySQL索引一定遵循最左前缀匹配吗？.md": "MySQL/MySQL索引一定遵循最左前缀匹配吗？.md",
+                "MySQL为什么会有存储碎片？有什么危害？.md": "MySQL/MySQL为什么会有存储碎片？有什么危害？.md",
+                "MySQL为什么是小表驱动大表，为什么能提高查询性能？.md": "MySQL/MySQL为什么是小表驱动大表，为什么能提高查询性能？.md",
+                "MySQL用了函数一定会索引失效吗？.md": "MySQL/MySQL用了函数一定会索引失效吗？.md",
+                "MySQL怎么做热点数据高效更新？.md": "MySQL/MySQL怎么做热点数据高效更新？.md",
+                "MySQL执行大事务会存在什么问题？.md": "MySQL/MySQL执行大事务会存在什么问题？.md",
+                "MySQL只操作同一条记录，也会发生死锁吗？.md": "MySQL/MySQL只操作同一条记录，也会发生死锁吗？.md",
+                "MySQL中like的模糊查询如何优化.md": "MySQL/MySQL中like的模糊查询如何优化.md",
+                "MySQL中的事务隔离级别？.md": "MySQL/MySQL中的事务隔离级别？.md",
+                "MySQL中如何查看一个SQL的执行耗时.md": "MySQL/MySQL中如何查看一个SQL的执行耗时.md",
+                "MySQL主从复制的过程.md": "MySQL/MySQL主从复制的过程.md",
+                "MySQL自增主键用完了会怎么样？.md": "MySQL/MySQL自增主键用完了会怎么样？.md",
+                "on和where有什么区别？.md": "MySQL/on和where有什么区别？.md",
+                "orderby是怎么实现的？.md": "MySQL/orderby是怎么实现的？.md",
+                "SQL语句如何实现insertOrUpdate的功能？.md": "MySQL/SQL语句如何实现insertOrUpdate的功能？.md",
+                "SQL执行计划分析的时候，要关注哪些信息？.md": "MySQL/SQL执行计划分析的时候，要关注哪些信息？.md",
+                "SQL中PK、UK、CK、FK、DF是什么意思？.md": "MySQL/SQL中PK、UK、CK、FK、DF是什么意思？.md",
+                "truncate、delete、drop的区别？.md": "MySQL/truncate、delete、drop的区别？.md",
+                "undolog会一直存在吗？什么时候删除？.md": "MySQL/undolog会一直存在吗？什么时候删除？.md",
+                "Usingfilesort能优化吗，怎么优化？.md": "MySQL/Usingfilesort能优化吗，怎么优化？.md",
+                "uuid和自增id做主键哪个好，为什么？.md": "MySQL/uuid和自增id做主键哪个好，为什么？.md",
+                "where条件的顺序影响使用索引吗？.md": "MySQL/where条件的顺序影响使用索引吗？.md",
+                "阿里的数据库能抗秒杀的原理.md": "MySQL/阿里的数据库能抗秒杀的原理.md",
+                "从innodb的索引结构分析，为什么索引的key长度不能太长_.md": "MySQL/从innodb的索引结构分析，为什么索引的key长度不能太长_.md",
+                "当前读和快照读有什么区别？.md": "MySQL/当前读和快照读有什么区别？.md",
+                "二级索引在索引覆盖时如何使用MVCC？.md": "MySQL/二级索引在索引覆盖时如何使用MVCC？.md",
+                "高并发情况下自增主键会不会重复，为什么？.md": "MySQL/高并发情况下自增主键会不会重复，为什么？.md",
+                "介绍下InnoDB的锁机制？.md": "MySQL/介绍下InnoDB的锁机制？.md",
+                "介绍下MySQL5.7中的组提交.md": "MySQL/介绍下MySQL5.7中的组提交.md",
+                "介绍一下InnoDB的数据页，和B+树的关系是什么？.md": "MySQL/介绍一下InnoDB的数据页，和B+树的关系是什么？.md",
+                "乐观锁与悲观锁如何实现？.md": "MySQL/乐观锁与悲观锁如何实现？.md",
+                "联合索引是越多越好吗？.md": "MySQL/联合索引是越多越好吗？.md",
+                "慢SQL的问题如何排查？.md": "MySQL/慢SQL的问题如何排查？.md",
+                "区分度不高的字段建索引一定没用吗？.md": "MySQL/区分度不高的字段建索引一定没用吗？.md",
+                "如何进行SQL调优？.md": "MySQL/如何进行SQL调优？.md",
+                "如何理解MVCC？.md": "MySQL/如何理解MVCC？.md",
+                "如何优化一个大规模的数据库系统？.md": "MySQL/如何优化一个大规模的数据库系统？.md",
+                "设计索引的时候有哪些原则？.md": "MySQL/设计索引的时候有哪些原则？.md",
+                "什么情况会导致自增主键不连续？.md": "MySQL/什么情况会导致自增主键不连续？.md",
+                "什么时候索引失效反而提升效率？.md": "MySQL/什么时候索引失效反而提升效率？.md",
+                "什么是bufferpool？.md": "MySQL/什么是bufferpool？.md",
+                "什么是InnoDB的页分裂和页合并.md": "MySQL/什么是InnoDB的页分裂和页合并.md",
+                "什么是MySQL的字典锁？.md": "MySQL/什么是MySQL的字典锁？.md",
+                "什么是OnlineDDL.md": "MySQL/什么是OnlineDDL.md",
+                "什么是ReadView，什么样的ReadView可见？.md": "MySQL/什么是ReadView，什么样的ReadView可见？.md",
+                "什么是回表，怎么减少回表的次数？.md": "MySQL/什么是回表，怎么减少回表的次数？.md",
+                "什么是聚簇索引和非聚簇索引？.md": "MySQL/什么是聚簇索引和非聚簇索引？.md",
+                "什么是排他锁和共享锁？.md": "MySQL/什么是排他锁和共享锁？.md",
+                "什么是事务的2阶段提交？.md": "MySQL/什么是事务的2阶段提交？.md",
+                "什么是数据库的锁升级，Innodb支持吗？.md": "MySQL/什么是数据库的锁升级，Innodb支持吗？.md",
+                "什么是数据库的主从延迟，如何解决？.md": "MySQL/什么是数据库的主从延迟，如何解决？.md",
+                "什么是数据库范式，为什么要反范式？.md": "MySQL/什么是数据库范式，为什么要反范式？.md",
+                "什么是数据库事务？.md": "MySQL/什么是数据库事务？.md",
+                "什么是索引覆盖、索引下推？.md": "MySQL/什么是索引覆盖、索引下推？.md",
+                "什么是索引合并，原理是什么？.md": "MySQL/什么是索引合并，原理是什么？.md",
+                "什么是索引跳跃扫描.md": "MySQL/什么是索引跳跃扫描.md",
+                "什么是意向锁？.md": "MySQL/什么是意向锁？.md",
+                "什么是脏读、幻读、不可重复读？.md": "MySQL/什么是脏读、幻读、不可重复读？.md",
+                "什么是最左前缀匹配？为什么要遵守？.md": "MySQL/什么是最左前缀匹配？为什么要遵守？.md",
+                "是否支持emoji表情存储，如果不支持，如何操作？.md": "MySQL/是否支持emoji表情存储，如果不支持，如何操作？.md",
+                "数据库加密后怎么做模糊查询？.md": "MySQL/数据库加密后怎么做模糊查询？.md",
+                "数据库乐观锁的过程中，完全没有加任何锁吗？.md": "MySQL/数据库乐观锁的过程中，完全没有加任何锁吗？.md",
+                "数据库扫表任务如何避免出现死循环.md": "MySQL/数据库扫表任务如何避免出现死循环.md",
+                "数据库死锁如何解决？.md": "MySQL/数据库死锁如何解决？.md",
+                "数据库怎么做加密和解密？.md": "MySQL/数据库怎么做加密和解密？.md",
+                "说一说MySQL一条SQL语句的执行过程？.md": "MySQL/说一说MySQL一条SQL语句的执行过程？.md",
+                "索引失效的问题如何排查？.md": "MySQL/索引失效的问题如何排查？.md",
+                "唯一索引和主键索引的区别？.md": "MySQL/唯一索引和主键索引的区别？.md",
+                "为什么MySQL8.0要取消查询缓存？.md": "MySQL/为什么MySQL8.0要取消查询缓存？.md",
+                "为什么MySQL会选错索引，如何解决？.md": "MySQL/为什么MySQL会选错索引，如何解决？.md",
+                "为什么MySQL默认使用RR隔离级别？.md": "MySQL/为什么MySQL默认使用RR隔离级别？.md",
+                "为什么不建议使用存储过程？.md": "MySQL/为什么不建议使用存储过程？.md",
+                "为什么不推荐使用外键？.md": "MySQL/为什么不推荐使用外键？.md",
+                "为什么大厂不建议使用多表join？.md": "MySQL/为什么大厂不建议使用多表join？.md",
+                "为什么默认RR，大厂要改成RC？.md": "MySQL/为什么默认RR，大厂要改成RC？.md",
+                "一个查询语句的执行顺序是怎么样的？.md": "MySQL/一个查询语句的执行顺序是怎么样的？.md",
+                "用了索引还是很慢，可能是什么原因？.md": "MySQL/用了索引还是很慢，可能是什么原因？.md",
+                "有了关系型数据库，为什么还需要NOSQL？.md": "MySQL/有了关系型数据库，为什么还需要NOSQL？.md",
+                "怎么比较两个索引的好坏？.md": "MySQL/怎么比较两个索引的好坏？.md",
+                "执行计划中，key有值，还是很慢怎么办？.md": "MySQL/执行计划中，key有值，还是很慢怎么办？.md"
+            },
+            
+            "RabbitMQ": {
+                "rabbitMQ的整体架构是怎么样的？.md": "RabbitMQ/rabbitMQ的整体架构是怎么样的？.md",
+                "RabbitMQ如何保证消息不丢.md": "RabbitMQ/RabbitMQ如何保证消息不丢.md",
+                "RabbitMQ如何防止重复消费.md": "RabbitMQ/RabbitMQ如何防止重复消费.md",
+                "RabbitMQ如何实现消费端限流.md": "RabbitMQ/RabbitMQ如何实现消费端限流.md",
+                "rabbitMQ如何实现延迟消息？.md": "RabbitMQ/rabbitMQ如何实现延迟消息？.md",
+                "RabbitMQ是如何保证高可用的_.md": "RabbitMQ/RabbitMQ是如何保证高可用的_.md",
+                "RabbitMQ是怎么做消息分发的？.md": "RabbitMQ/RabbitMQ是怎么做消息分发的？.md",
+                "介绍下RabbitMQ的事务机制.md": "RabbitMQ/介绍下RabbitMQ的事务机制.md",
+                "如何保障消息一定能发送到RabbitMQ.md": "RabbitMQ/如何保障消息一定能发送到RabbitMQ.md",
+                "什么是RabbitMQ的死信队列？.md": "RabbitMQ/什么是RabbitMQ的死信队列？.md"
+            },
+            
+            "Spring": {
+                "@Lazy注解能解决循环依赖吗？.md": "Spring/@Lazy注解能解决循环依赖吗？.md",
+                "@PostConstruct、init-method和afterPropertiesSet执行顺序.md": "Spring/@PostConstruct、init-method和afterPropertiesSet执行顺序.md",
+                "Autowired和Resource的关系？.md": "Spring/Autowired和Resource的关系？.md",
+                "BeanFactory和FactroyBean的关系？.md": "Spring/BeanFactory和FactroyBean的关系？.md",
+                "Spring6.0和SpringBoot3.0有什么新特性？.md": "Spring/Spring6.0和SpringBoot3.0有什么新特性？.md",
+                "SpringBean的初始化过程是怎么样的？.md": "Spring/SpringBean的初始化过程是怎么样的？.md",
+                "SpringBean的生命周期是怎么样的？.md": "Spring/SpringBean的生命周期是怎么样的？.md",
+                "SpringBoot的启动流程是怎么样的？.md": "Spring/SpringBoot的启动流程是怎么样的？.md",
+                "SpringBoot和Spring的区别是什么？.md": "Spring/SpringBoot和Spring的区别是什么？.md",
+                "SpringBoot如何让你的bean在其他bean之前加载.md": "Spring/SpringBoot如何让你的bean在其他bean之前加载.md",
+                "SpringBoot如何做优雅停机？.md": "Spring/SpringBoot如何做优雅停机？.md",
+                "SpringBoot是如何实现main方法启动Web项目的？.md": "Spring/SpringBoot是如何实现main方法启动Web项目的？.md",
+                "Springboot是如何实现自动配置的？.md": "Spring/Springboot是如何实现自动配置的？.md",
+                "SpringMVC是如何将不同的Request路由到不同Controller中的？.md": "Spring/SpringMVC是如何将不同的Request路由到不同Controller中的？.md",
+                "Spring的@Autowired能用在Map上吗？.md": "Spring/Spring的@Autowired能用在Map上吗？.md",
+                "Spring的AOP在什么场景下会失效？.md": "Spring/Spring的AOP在什么场景下会失效？.md",
+                "Spring的事务传播机制有哪些？.md": "Spring/Spring的事务传播机制有哪些？.md",
+                "Spring的事务在多线程下生效吗？为什么？.md": "Spring/Spring的事务在多线程下生效吗？为什么？.md",
+                "Spring解决循环依赖一定需要三级缓存吗？.md": "Spring/Spring解决循环依赖一定需要三级缓存吗？.md",
+                "Spring默认支持循环依赖吗？如果发生如何解决？.md": "Spring/Spring默认支持循环依赖吗？如果发生如何解决？.md",
+                "Spring事务失效可能是哪些原因？.md": "Spring/Spring事务失效可能是哪些原因？.md",
+                "Spring在业务中常见的使用方式.md": "Spring/Spring在业务中常见的使用方式.md",
+                "Spring中@Service、@Component、@Repository等注解区别是什么？.md": "Spring/Spring中@Service、@Component、@Repository等注解区别是什么？.md",
+                "Spring中shutdownhook作用是什么？.md": "Spring/Spring中shutdownhook作用是什么？.md",
+                "Spring中创建Bean有几种方式_.md": "Spring/Spring中创建Bean有几种方式_.md",
+                "Spring中的Bean是线程安全的吗？.md": "Spring/Spring中的Bean是线程安全的吗？.md",
+                "Spring中的Bean作用域有哪些？.md": "Spring/Spring中的Bean作用域有哪些？.md",
+                "Spring中的事务事件如何使用？.md": "Spring/Spring中的事务事件如何使用？.md",
+                "Spring中如何开启事务？.md": "Spring/Spring中如何开启事务？.md",
+                "Spring中如何实现多环境配置？.md": "Spring/Spring中如何实现多环境配置？.md",
+                "Spring中用到了哪些设计模式.md": "Spring/Spring中用到了哪些设计模式.md",
+                "Spring中注入Bean有几种方式.md": "Spring/Spring中注入Bean有几种方式.md",
+                "介绍下@Scheduled的实现原理以及用法.md": "Spring/介绍下@Scheduled的实现原理以及用法.md",
+                "介绍一下Spring的AOP.md": "Spring/介绍一下Spring的AOP.md",
+                "介绍一下Spring的IOC.md": "Spring/介绍一下Spring的IOC.md",
+                "如何根据配置动态生成Spring的Bean？.md": "Spring/如何根据配置动态生成Spring的Bean？.md",
+                "如何统计一个Bean中的方法调用次数.md": "Spring/如何统计一个Bean中的方法调用次数.md",
+                "如何在Spring启动过程中做缓存预热.md": "Spring/如何在Spring启动过程中做缓存预热.md",
+                "如何自定义一个starter？.md": "Spring/如何自定义一个starter？.md",
+                "三级缓存是如何解决循环依赖的问题的？.md": "Spring/三级缓存是如何解决循环依赖的问题的？.md",
+                "什么是MVC.md": "Spring/什么是MVC.md",
+                "什么是Spring的三级缓存.md": "Spring/什么是Spring的三级缓存.md",
+                "什么是Spring的循环依赖问题？.md": "Spring/什么是Spring的循环依赖问题？.md",
+                "同时使用@Transactional与@Async时，事务会不会生效？.md": "Spring/同时使用@Transactional与@Async时，事务会不会生效？.md",
+                "为什么SpringBoot3中移除了spring.factories.md": "Spring/为什么SpringBoot3中移除了spring.factories.md",
+                "为什么Spring不建议使用基于字段的依赖注入？.md": "Spring/为什么Spring不建议使用基于字段的依赖注入？.md",
+                "为什么不建议直接使用Spring的@Async.md": "Spring/为什么不建议直接使用Spring的@Async.md",
+                "在Spring中如何使用SpringEvent做事件驱动.md": "Spring/在Spring中如何使用SpringEvent做事件驱动.md"
+            },
+            "场景题": {
+                "40亿个QQ号，限制1G内存，如何去重？.md":"场景题/40亿个QQ号，限制1G内存，如何去重？.md",
+"4C8G_16台和8C16G_8台，不考虑成本的情况怎么选？.md":"场景题/4C8G_16台和8C16G_8台，不考虑成本的情况怎么选？.md",
+"4C8G的机器，各项系统指标，什么范围算是正常？.md":"场景题/4C8G的机器，各项系统指标，什么范围算是正常？.md",
+"a,b的联合索引，selectbwherea=xx，无法走索引覆盖什么原因？.md":"场景题/a,b的联合索引，selectbwherea=xx，无法走索引覆盖什么原因？.md",
+"InnoDB为什么不用跳表，Redis为什么不用B+树？.md":"场景题/InnoDB为什么不用跳表，Redis为什么不用B+树？.md",
+"Kafka，单分区单消费者实例，如何提高吞吐量.md":"场景题/Kafka，单分区单消费者实例，如何提高吞吐量.md",
+"MySQL里有2000W数据，Redis中只存20W的数据，如何保证Redis中的数据都是热点数据_.md":"场景题/MySQL里有2000W数据，Redis中只存20W的数据，如何保证Redis中的数据都是热点数据_.md",
+"MySQL千万级大表如何做数据清理？.md":"场景题/MySQL千万级大表如何做数据清理？.md",
+"MySQL热点数据更新会带来哪些问题？.md":"场景题/MySQL热点数据更新会带来哪些问题？.md",
+"Redis的zset实现排行榜，实现分数相同按照时间顺序排序，怎么做？.md":"场景题/Redis的zset实现排行榜，实现分数相同按照时间顺序排序，怎么做？.md",
+"Redis的内存如果用满了，会挂吗？.md":"场景题/Redis的内存如果用满了，会挂吗？.md",
+"Redis如果挂了，你怎么办？.md":"场景题/Redis如果挂了，你怎么办？.md",
+"SpringEvent和MQ有什么区别？各自适用场景是什么？.md":"场景题/SpringEvent和MQ有什么区别？各自适用场景是什么？.md",
+"把商品加入购物车时断网了，该怎么在重新联网时同步？.md":"场景题/把商品加入购物车时断网了，该怎么在重新联网时同步？.md",
+"不使用synchronized和Lock如何设计一个线程安全的单例？.md":"场景题/不使用synchronized和Lock如何设计一个线程安全的单例？.md",
+"不用redis分布式锁，如何防止用户重复点击？.md":"场景题/不用redis分布式锁，如何防止用户重复点击？.md",
+"不用大于号小于号怎么判断两个正整数大小？.md":"场景题/不用大于号小于号怎么判断两个正整数大小？.md",
+"从B+树的角度分析为什么单表2000万要考虑分表？？.md":"场景题/从B+树的角度分析为什么单表2000万要考虑分表？？.md",
+"大量的手机号码被标记成骚扰电话，如何存储这些号码_.md":"场景题/大量的手机号码被标记成骚扰电话，如何存储这些号码_.md",
+"大型电商的订单系统，如何设计分库分表方案？.md":"场景题/大型电商的订单系统，如何设计分库分表方案？.md",
+"代码中使用长事务，会带来哪些问题？.md":"场景题/代码中使用长事务，会带来哪些问题？.md",
+"电商下单场景，如何设计一个数据一致性方案？.md":"场景题/电商下单场景，如何设计一个数据一致性方案？.md",
+"调用第三方接口支付时，第三方接口显示支付成功，但是在调用方显示支付失败，问题可能出在哪里.md":"场景题/调用第三方接口支付时，第三方接口显示支付成功，但是在调用方显示支付失败，问题可能出在哪里.md",
+"订单到期关闭如何实现.md":"场景题/订单到期关闭如何实现.md",
+"读取一千个文件，一个线程读取和开十个线程读取，哪种方式效率高？.md":"场景题/读取一千个文件，一个线程读取和开十个线程读取，哪种方式效率高？.md",
+"分布式系统，用户登录信息保存在服务器A上，服务器B如何获取到共享Session.md":"场景题/分布式系统，用户登录信息保存在服务器A上，服务器B如何获取到共享Session.md",
+"分库分表时，每个城市的人口不一样，有的密集，有的稀疏，如何实现均匀分布？.md":"场景题/分库分表时，每个城市的人口不一样，有的密集，有的稀疏，如何实现均匀分布？.md",
+"高并发的库存系统，在数据库扣减库存，怎么实现？.md":"场景题/高并发的库存系统，在数据库扣减库存，怎么实现？.md",
+"给第三方提供接口调用，需要注意些什么？.md":"场景题/给第三方提供接口调用，需要注意些什么？.md",
+"和其他公司做数据交互时，有什么需要注意的？.md":"场景题/和其他公司做数据交互时，有什么需要注意的？.md",
+"和外部机构交互如何防止被外部服务不可用而拖垮.md":"场景题/和外部机构交互如何防止被外部服务不可用而拖垮.md",
+"加分布式锁之后影响并发了怎么办？.md":"场景题/加分布式锁之后影响并发了怎么办？.md",
+"进入电梯里断网后又恢复刚开始为什么网络慢？.md":"场景题/进入电梯里断网后又恢复刚开始为什么网络慢？.md",
+"库存扣减如何避免超卖和少卖？.md":"场景题/库存扣减如何避免超卖和少卖？.md",
+"每天100w次登录请求，4C8G机器如何做JVM调优？.md":"场景题/每天100w次登录请求，4C8G机器如何做JVM调优？.md",
+"你认为分布式架构一定比单体架构要好吗？.md":"场景题/你认为分布式架构一定比单体架构要好吗？.md",
+"你是如何进行SQL调优的？.md":"场景题/你是如何进行SQL调优的？.md",
+"让你设计一个订单号生成服务，该怎么做_.md":"场景题/让你设计一个订单号生成服务，该怎么做_.md",
+"让你设计一个秒杀系统，你会考虑哪些问题？.md":"场景题/让你设计一个秒杀系统，你会考虑哪些问题？.md",
+"如果单表数据量大，只能考虑分库分表吗？.md":"场景题/如果单表数据量大，只能考虑分库分表吗？.md",
+"如果你的业务量突然提升100倍QPS你会怎么做？.md":"场景题/如果你的业务量突然提升100倍QPS你会怎么做？.md",
+"如果让你实现消息队列，会考虑哪些问题？.md":"场景题/如果让你实现消息队列，会考虑哪些问题？.md",
+"如果让你实现一个RPC框架，会考虑用哪些技术解决哪些问题？.md":"场景题/如果让你实现一个RPC框架，会考虑用哪些技术解决哪些问题？.md",
+"如果需要跨库join，该如何实现？.md":"场景题/如果需要跨库join，该如何实现？.md",
+"如果要存IP地址，用什么数据类型比较好？.md":"场景题/如果要存IP地址，用什么数据类型比较好？.md",
+"如何解决消息重复消费、重复下单等问题？.md":"场景题/如何解决消息重复消费、重复下单等问题？.md",
+"如何设计一个购物车功能？.md":"场景题/如何设计一个购物车功能？.md",
+"如何实现_查找附近的人_功能？.md":"场景题/如何实现_查找附近的人_功能？.md",
+"如何实现百万级排行榜功能？.md":"场景题/如何实现百万级排行榜功能？.md",
+"如何实现百万级数据从Excel导入到数据库？.md":"场景题/如何实现百万级数据从Excel导入到数据库？.md",
+"如何实现缓存的预热？.md":"场景题/如何实现缓存的预热？.md",
+"如何实现敏感词过滤？.md":"场景题/如何实现敏感词过滤？.md",
+"如何实现一个抢红包功能？.md":"场景题/如何实现一个抢红包功能？.md",
+"如何用Redis实现朋友圈点赞功能？.md":"场景题/如何用Redis实现朋友圈点赞功能？.md",
+"如何预估一个系统的QPS？.md":"场景题/如何预估一个系统的QPS？.md",
+"如何做SQL调优：用了主键索引反而查询很慢？.md":"场景题/如何做SQL调优：用了主键索引反而查询很慢？.md",
+"如何做平滑的数据迁移_.md":"场景题/如何做平滑的数据迁移_.md",
+"实现一个登录拉黑功能，实现拉黑用户和把已经登陆用户踢下线。.md":"场景题/实现一个登录拉黑功能，实现拉黑用户和把已经登陆用户踢下线。.md",
+"使用分布式锁时，分布式锁加在事务外面还是里面，有什么区别？.md":"场景题/使用分布式锁时，分布式锁加在事务外面还是里面，有什么区别？.md",
+"数据库乐观锁和悲观锁以及redis分布式锁的区别和使用场景？.md":"场景题/数据库乐观锁和悲观锁以及redis分布式锁的区别和使用场景？.md",
+"数据库逻辑删除后，怎么做唯一性约束？.md":"场景题/数据库逻辑删除后，怎么做唯一性约束？.md",
+"说一说多级缓存是如何应用的？.md":"场景题/说一说多级缓存是如何应用的？.md",
+"索引失效的问题是如何排查的，有那些种情况？.md":"场景题/索引失效的问题是如何排查的，有那些种情况？.md",
+"外卖系统，一天一千万条数据，用户需要查到近30天的数据，商家也要查询到30天的数据，怎么设计表？.md":"场景题/外卖系统，一天一千万条数据，用户需要查到近30天的数据，商家也要查询到30天的数据，怎么设计表？.md",
+"为啥不要在事务中做外部调用？.md":"场景题/为啥不要在事务中做外部调用？.md",
+"为什么MySQL用B+树，MongoDB用B树？.md":"场景题/为什么MySQL用B+树，MongoDB用B树？.md",
+"为什么不建议使用MQ实现订单到期关闭？.md":"场景题/为什么不建议使用MQ实现订单到期关闭？.md",
+"为什么不用分布式锁来实现秒杀？.md":"场景题/为什么不用分布式锁来实现秒杀？.md",
+"为什么不直接用原生的BlockinQueue做消息队列.md":"场景题/为什么不直接用原生的BlockinQueue做消息队列.md",
+"为什么很多公司数据库不允许物理删除(delete)数据.md":"场景题/为什么很多公司数据库不允许物理删除(delete)数据.md",
+"为什么一定要做限流？不应该服务好客户吗？不应该是加机器吗？.md":"场景题/为什么一定要做限流？不应该服务好客户吗？不应该是加机器吗？.md",
+"线上接口如果响应很慢如何去排查定位问题呢？.md":"场景题/线上接口如果响应很慢如何去排查定位问题呢？.md",
+"项目中，如果日志打印成为瓶颈，该如何优化？.md":"场景题/项目中，如果日志打印成为瓶颈，该如何优化？.md",
+"消息队列使用拉模式好还是推模式好？为什么？.md":"场景题/消息队列使用拉模式好还是推模式好？为什么？.md",
+"一次RPC请求，客户端显示超时，但是服务端不超时，可能是什么原因？.md":"场景题/一次RPC请求，客户端显示超时，但是服务端不超时，可能是什么原因？.md",
+"一个表有用户和时间两个列，现有3个需求：根据用户查；根据日期查；根据日期和用户查；问怎么建立索引？.md":"场景题/一个表有用户和时间两个列，现有3个需求：根据用户查；根据日期查；根据日期和用户查；问怎么建立索引？.md",
+"一个订单，在11_00超时关闭，但在11_00也支付成功了，怎么办？.md":"场景题/一个订单，在11_00超时关闭，但在11_00也支付成功了，怎么办？.md",
+"一个接口3000QPS，接口RT为200MS，预估需要几台机器？.md":"场景题/一个接口3000QPS，接口RT为200MS，预估需要几台机器？.md",
+"一个支付单，多个渠道同时支付成功了怎么办？.md":"场景题/一个支付单，多个渠道同时支付成功了怎么办？.md",
+"应用启动后前几分钟，Load、RT、CPU等飙高，如何定位，可能的原因是什么？.md":"场景题/应用启动后前几分钟，Load、RT、CPU等飙高，如何定位，可能的原因是什么？.md",
+"应用占用内存持续增长，但是堆内存、元空间都没变化，可能是什么原因？.md":"场景题/应用占用内存持续增长，但是堆内存、元空间都没变化，可能是什么原因？.md",
+"用了一锁二查三更新，为啥还出现了重复数据？.md":"场景题/用了一锁二查三更新，为啥还出现了重复数据？.md",
+"在100M内存下存储一:亿个整数，其范围在１到2亿，如何快速判断给定到一个整数值是否存在？.md":	"在100M内存下存储一:亿个整数，其范围在１到2亿，如何快速判断给定到一个整数值是否存在？.m",
+"怎么做数据对账？.md":"场景题/怎么做数据对账？.md"
+            }
+        };
+
+        // 2. 动态生成MD文件链接列表
+        function renderMdLinks() {
+            const container = document.getElementById('md-links-container');
+            let totalCount = 0;
+
+            // 遍历所有分类
+            for (const [category, files] of Object.entries(MD_DOCUMENTS)) {
+                // 创建分类标题
+                const categoryDiv = document.createElement('div');
+                categoryDiv.className = 'category-item';
+                
+                const title = document.createElement('h2');
+                title.className = 'category-title';
+                title.innerHTML = `<i class="fa fa-folder-open text-primary mr-2"></i>${category}`;
+                categoryDiv.appendChild(title);
+
+                // 创建链接列表
+                const linkList = document.createElement('div');
+                linkList.className = 'pl-2';
+
+                // 遍历当前分类下的所有文件
+                for (const [fileName, filePath] of Object.entries(files)) {
+                    const link = document.createElement('a');
+                    link.className = 'md-link';
+                    link.href = filePath;
+                    link.target = '_blank';
+                    link.innerHTML = `<i class="fa fa-file-text text-gray-500 mr-2"></i>${fileName}`;
+                    linkList.appendChild(link);
+                    totalCount++;
+                }
+
+                categoryDiv.appendChild(linkList);
+                container.appendChild(categoryDiv);
+            }
+
+            // 更新总数
+            document.getElementById('md-count').textContent = totalCount;
+        }
+
+        // 3. 页面加载完成后渲染链接
+        document.addEventListener('DOMContentLoaded', renderMdLinks);
+    </script>
 </body>
 </html>
+    
