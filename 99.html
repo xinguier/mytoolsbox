@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>九九乘法表游戏</title>
+    <title>九九乘法表挑战游戏</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -13,6 +13,7 @@
             min-height: 100vh;
             margin: 0;
             background: linear-gradient(135deg, #6ecbf5, #c2e9fb);
+            overflow: hidden;
         }
 
         .container {
@@ -23,6 +24,8 @@
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
             max-width: 600px;
             width: 90%;
+            position: relative;
+            z-index: 10;
         }
 
         h1 {
@@ -42,10 +45,35 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
-        .score, .level {
+        .score, .level, .timer {
             font-size: 20px;
             font-weight: bold;
             color: #3498db;
+        }
+
+        .progress-container {
+            margin: 15px 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            background-color: #3498db;
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .progress-text {
+            margin-top: 5px;
+            font-size: 14px;
+            color: #666;
         }
 
         .game-area {
@@ -152,6 +180,28 @@
             margin: 20px 0;
         }
 
+        /* 撒花动画 */
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #f00;
+            opacity: 0.8;
+            border-radius: 50%;
+            animation: fall linear forwards;
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(-100px) rotate(0deg);
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
         /* 响应式设计 */
         @media (max-width: 600px) {
             .container {
@@ -179,10 +229,18 @@
 </head>
 <body>
     <div class="container">
-        <h1>九九乘法表游戏</h1>
+        <h1>九九乘法表挑战游戏</h1>
         <div class="game-info">
             <div class="score">得分: <span id="score">0</span></div>
-            <div class="level">等级: <span id="level">1</span></div>
+            <div class="level">等级: <span id="current-level">1</span>/10</div>
+            <div class="timer">时间: <span id="timer">00:00</span></div>
+        </div>
+        
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress" id="progress-bar"></div>
+            </div>
+            <div class="progress-text">进度: <span id="progress-text">0</span>/10</div>
         </div>
         
         <div class="game-area">
@@ -206,28 +264,87 @@
         document.addEventListener('DOMContentLoaded', () => {
             // 游戏状态
             let score = 0;
-            let level = 1;
+            let currentLevel = 1;
             let currentQuestion = null;
             let gameActive = false;
             let questionCount = 0;
-            let maxQuestions = 20; // 每轮20道题
+            let questionsInLevel = 10; // 每个等级10道题
+            let startTime = null;
+            let timerInterval = null;
+            let elapsedTime = 0;
+            let lastQuestion = null; // 用于记录上一道题
             
             // DOM元素
             const scoreDisplay = document.getElementById('score');
-            const levelDisplay = document.getElementById('level');
+            const levelDisplay = document.getElementById('current-level');
             const questionDisplay = document.getElementById('question');
             const answerInput = document.getElementById('answer-input');
             const submitBtn = document.getElementById('submit-btn');
             const startBtn = document.getElementById('start-btn');
             const resetBtn = document.getElementById('reset-btn');
             const gameStatus = document.getElementById('game-status');
+            const progressBar = document.getElementById('progress-bar');
+            const progressText = document.getElementById('progress-text');
+            const timerDisplay = document.getElementById('timer');
             
-            // 生成随机乘法题
+            // 根据等级生成题目
             function generateQuestion() {
-                // 根据等级调整难度
-                const maxFactor = Math.min(2 + level, 9); // 等级越高，数字越大
-                const factor1 = Math.floor(Math.random() * maxFactor) + 1;
-                const factor2 = Math.floor(Math.random() * maxFactor) + 1;
+                let factor1, factor2;
+                
+                // 难度随等级递增
+                if (currentLevel <= 3) {
+                    // 等级1-3: 2-5的乘法 (避免1*1)
+                    factor1 = Math.floor(Math.random() * 4) + 2; // 2-5
+                    factor2 = Math.floor(Math.random() * 4) + 2; // 2-5
+                } else if (currentLevel <= 6) {
+                    // 等级4-6: 6-7的乘法
+                    factor1 = Math.floor(Math.random() * 2) + 6; // 6-7
+                    factor2 = Math.floor(Math.random() * 6) + 2; // 2-7
+                } else {
+                    // 等级7-10: 7-9的乘法
+                    factor1 = Math.floor(Math.random() * 3) + 7; // 7-9
+                    factor2 = Math.floor(Math.random() * 8) + 2; // 2-9
+                }
+                
+                // 确保数字不超过9且不出现1*1
+                factor1 = Math.min(factor1, 9);
+                factor2 = Math.min(factor2, 9);
+                
+                // 避免1*1的情况
+                if (factor1 === 1 && factor2 === 1) {
+                    factor1 = 2;
+                    factor2 = 2;
+                }
+                
+                // 确保连续两道题不重复
+                let attempts = 0;
+                while (lastQuestion && 
+                       attempts < 10 && 
+                       ((factor1 === lastQuestion.num1 && factor2 === lastQuestion.num2) || 
+                        (factor1 === lastQuestion.num2 && factor2 === lastQuestion.num1))) {
+                    // 重新生成题目
+                    if (currentLevel <= 3) {
+                        factor1 = Math.floor(Math.random() * 4) + 2; // 2-5
+                        factor2 = Math.floor(Math.random() * 4) + 2; // 2-5
+                    } else if (currentLevel <= 6) {
+                        factor1 = Math.floor(Math.random() * 2) + 6; // 6-7
+                        factor2 = Math.floor(Math.random() * 6) + 2; // 2-7
+                    } else {
+                        factor1 = Math.floor(Math.random() * 3) + 7; // 7-9
+                        factor2 = Math.floor(Math.random() * 8) + 2; // 2-9
+                    }
+                    
+                    factor1 = Math.min(factor1, 9);
+                    factor2 = Math.min(factor2, 9);
+                    
+                    // 避免1*1的情况
+                    if (factor1 === 1 && factor2 === 1) {
+                        factor1 = 2;
+                        factor2 = 2;
+                    }
+                    
+                    attempts++;
+                }
                 
                 const question = {
                     num1: factor1,
@@ -235,7 +352,39 @@
                     answer: factor1 * factor2
                 };
                 
+                // 更新上一道题的记录
+                lastQuestion = question;
+                
                 return question;
+            }
+            
+            // 格式化时间显示
+            function formatTime(seconds) {
+                const mins = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            }
+            
+            // 更新计时器
+            function updateTimer() {
+                if (startTime) {
+                    elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+                    timerDisplay.textContent = formatTime(elapsedTime);
+                }
+            }
+            
+            // 启动计时器
+            function startTimer() {
+                startTime = Date.now() - elapsedTime * 1000;
+                timerInterval = setInterval(updateTimer, 1000);
+            }
+            
+            // 停止计时器
+            function stopTimer() {
+                if (timerInterval) {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                }
             }
             
             // 显示题目
@@ -263,26 +412,53 @@
                 
                 if (userAnswer === currentQuestion.answer) {
                     // 正确答案
-                    score += level * 10; // 等级越高，得分越高
+                    // 根据等级给予不同分数，等级越高分数越高
+                    const points = currentLevel * 10; // 等级越高，得分越高
+                    score += points;
                     scoreDisplay.textContent = score;
                     showStatus('正确！', 'correct');
-                    
-                    // 每答对5题升一级
-                    if (questionCount % 5 === 0) {
-                        level++;
-                        levelDisplay.textContent = level;
-                    }
                 } else {
                     // 错误答案
                     showStatus(`错误！正确答案是 ${currentQuestion.answer}`, 'incorrect');
                 }
                 
-                // 检查是否完成一轮
-                if (questionCount >= maxQuestions) {
-                    endGame();
+                // 更新进度条
+                updateProgress();
+                
+                // 检查是否完成当前等级
+                if (questionCount >= questionsInLevel) {
+                    if (currentLevel < 10) {
+                        // 进入下一级
+                        setTimeout(() => {
+                            currentLevel++;
+                            levelDisplay.textContent = currentLevel;
+                            questionCount = 0;
+                            showStatus(`恭喜进入第 ${currentLevel} 关！`, 'correct');
+                            
+                            // 重置lastQuestion开始新等级
+                            lastQuestion = null;
+                            
+                            // 更新进度条
+                            updateProgress();
+                            
+                            setTimeout(displayQuestion, 1500); // 1.5秒后显示下一题
+                        }, 1500);
+                    } else {
+                        // 完成所有等级
+                        setTimeout(() => {
+                            endGame();
+                        }, 1500);
+                    }
                 } else {
                     setTimeout(displayQuestion, 1000); // 1秒后显示下一题
                 }
+            }
+            
+            // 更新进度条
+            function updateProgress() {
+                const progress = (questionCount / questionsInLevel) * 100;
+                progressBar.style.width = `${progress}%`;
+                progressText.textContent = questionCount;
             }
             
             // 显示游戏状态
@@ -298,13 +474,23 @@
                 gameActive = true;
                 questionCount = 0;
                 score = 0;
-                level = 1;
+                currentLevel = 1;
+                elapsedTime = 0;
+                lastQuestion = null;
                 
                 scoreDisplay.textContent = score;
-                levelDisplay.textContent = level;
+                levelDisplay.textContent = currentLevel;
                 startBtn.disabled = true;
                 submitBtn.disabled = false;
                 answerInput.disabled = false;
+                
+                // 重置进度条
+                progressBar.style.width = '0%';
+                progressText.textContent = '0';
+                
+                // 重置计时器
+                timerDisplay.textContent = '00:00';
+                startTimer();
                 
                 displayQuestion();
             }
@@ -312,7 +498,12 @@
             // 结束游戏
             function endGame() {
                 gameActive = false;
-                showStatus(`游戏结束！总得分: ${score}`, 'correct');
+                stopTimer();
+                showStatus(`恭喜通关！总得分: ${score}，用时: ${formatTime(elapsedTime)}`, 'correct');
+                
+                // 显示撒花动画
+                setTimeout(createConfetti, 500);
+                
                 startBtn.disabled = false;
                 submitBtn.disabled = true;
                 answerInput.disabled = true;
@@ -323,17 +514,61 @@
                 gameActive = false;
                 questionCount = 0;
                 score = 0;
-                level = 1;
+                currentLevel = 1;
+                elapsedTime = 0;
+                lastQuestion = null;
                 
                 scoreDisplay.textContent = score;
-                levelDisplay.textContent = level;
+                levelDisplay.textContent = currentLevel;
                 questionDisplay.textContent = '点击开始游戏';
                 gameStatus.textContent = '';
                 gameStatus.className = 'game-status';
                 answerInput.value = '';
+                timerDisplay.textContent = '00:00';
+                
+                // 重置进度条
+                progressBar.style.width = '0%';
+                progressText.textContent = '0';
+                
+                stopTimer();
+                
                 startBtn.disabled = false;
                 submitBtn.disabled = true;
                 answerInput.disabled = true;
+            }
+            
+            // 撒花动画
+            function createConfetti() {
+                const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ff8000'];
+                const container = document.body;
+                const particleCount = 150;
+                
+                for (let i = 0; i < particleCount; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    
+                    // 随机颜色
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    
+                    // 随机大小
+                    const size = Math.random() * 10 + 5;
+                    confetti.style.width = `${size}px`;
+                    confetti.style.height = `${size}px`;
+                    
+                    // 随机位置
+                    confetti.style.left = `${Math.random() * 100}vw`;
+                    
+                    // 随机动画时长
+                    const duration = Math.random() * 3 + 2;
+                    confetti.style.animationDuration = `${duration}s`;
+                    
+                    container.appendChild(confetti);
+                    
+                    // 移除已掉落的粒子
+                    setTimeout(() => {
+                        confetti.remove();
+                    }, duration * 1000);
+                }
             }
             
             // 事件监听器
