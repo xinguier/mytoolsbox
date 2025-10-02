@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>九九乘法表游戏</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #6ecbf5, #c2e9fb);
+        }
+
+        .container {
+            text-align: center;
+            background-color: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            width: 90%;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin-bottom: 25px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .score, .level {
+            font-size: 20px;
+            font-weight: bold;
+            color: #3498db;
+        }
+
+        .game-area {
+            margin: 20px 0;
+        }
+
+        .question-container {
+            margin-bottom: 25px;
+        }
+
+        .question {
+            font-size: 36px;
+            font-weight: bold;
+            color: #e74c3c;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            border-left: 5px solid #e74c3c;
+        }
+
+        .input-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        #answer-input {
+            padding: 12px 15px;
+            font-size: 20px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            width: 150px;
+            text-align: center;
+        }
+
+        #answer-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 8px rgba(52, 152, 219, 0.5);
+        }
+
+        #submit-btn, #start-btn, #reset-btn {
+            padding: 12px 20px;
+            font-size: 18px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #submit-btn {
+            background-color: #2ecc71;
+            color: white;
+        }
+
+        #submit-btn:hover {
+            background-color: #27ae60;
+        }
+
+        #submit-btn:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        #start-btn {
+            background-color: #3498db;
+            color: white;
+            margin-right: 10px;
+        }
+
+        #start-btn:hover {
+            background-color: #2980b9;
+        }
+
+        #reset-btn {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        #reset-btn:hover {
+            background-color: #c0392b;
+        }
+
+        .game-status {
+            margin: 20px 0;
+            font-size: 20px;
+            font-weight: bold;
+            height: 30px;
+            min-height: 30px;
+        }
+
+        .correct {
+            color: #27ae60;
+        }
+
+        .incorrect {
+            color: #e74c3c;
+        }
+
+        .controls {
+            margin: 20px 0;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            .question {
+                font-size: 28px;
+            }
+            
+            #answer-input {
+                width: 120px;
+                font-size: 18px;
+            }
+            
+            .input-container {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>九九乘法表游戏</h1>
+        <div class="game-info">
+            <div class="score">得分: <span id="score">0</span></div>
+            <div class="level">等级: <span id="level">1</span></div>
+        </div>
+        
+        <div class="game-area">
+            <div class="question-container">
+                <div class="question" id="question">点击开始游戏</div>
+                <div class="input-container">
+                    <input type="number" id="answer-input" placeholder="输入答案" autocomplete="off">
+                    <button id="submit-btn">提交</button>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button id="start-btn">开始游戏</button>
+                <button id="reset-btn">重新开始</button>
+            </div>
+        </div>
+        
+        <div class="game-status" id="game-status"></div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // 游戏状态
+            let score = 0;
+            let level = 1;
+            let currentQuestion = null;
+            let gameActive = false;
+            let questionCount = 0;
+            let maxQuestions = 20; // 每轮20道题
+            
+            // DOM元素
+            const scoreDisplay = document.getElementById('score');
+            const levelDisplay = document.getElementById('level');
+            const questionDisplay = document.getElementById('question');
+            const answerInput = document.getElementById('answer-input');
+            const submitBtn = document.getElementById('submit-btn');
+            const startBtn = document.getElementById('start-btn');
+            const resetBtn = document.getElementById('reset-btn');
+            const gameStatus = document.getElementById('game-status');
+            
+            // 生成随机乘法题
+            function generateQuestion() {
+                // 根据等级调整难度
+                const maxFactor = Math.min(2 + level, 9); // 等级越高，数字越大
+                const factor1 = Math.floor(Math.random() * maxFactor) + 1;
+                const factor2 = Math.floor(Math.random() * maxFactor) + 1;
+                
+                const question = {
+                    num1: factor1,
+                    num2: factor2,
+                    answer: factor1 * factor2
+                };
+                
+                return question;
+            }
+            
+            // 显示题目
+            function displayQuestion() {
+                currentQuestion = generateQuestion();
+                questionDisplay.textContent = `${currentQuestion.num1} × ${currentQuestion.num2} = ?`;
+                answerInput.value = '';
+                answerInput.focus();
+                gameStatus.textContent = '';
+                gameStatus.className = 'game-status';
+            }
+            
+            // 检查答案
+            function checkAnswer() {
+                if (!gameActive) return;
+                
+                const userAnswer = parseInt(answerInput.value);
+                
+                if (isNaN(userAnswer)) {
+                    showStatus('请输入一个数字', 'incorrect');
+                    return;
+                }
+                
+                questionCount++;
+                
+                if (userAnswer === currentQuestion.answer) {
+                    // 正确答案
+                    score += level * 10; // 等级越高，得分越高
+                    scoreDisplay.textContent = score;
+                    showStatus('正确！', 'correct');
+                    
+                    // 每答对5题升一级
+                    if (questionCount % 5 === 0) {
+                        level++;
+                        levelDisplay.textContent = level;
+                    }
+                } else {
+                    // 错误答案
+                    showStatus(`错误！正确答案是 ${currentQuestion.answer}`, 'incorrect');
+                }
+                
+                // 检查是否完成一轮
+                if (questionCount >= maxQuestions) {
+                    endGame();
+                } else {
+                    setTimeout(displayQuestion, 1000); // 1秒后显示下一题
+                }
+            }
+            
+            // 显示游戏状态
+            function showStatus(message, className) {
+                gameStatus.textContent = message;
+                gameStatus.className = `game-status ${className}`;
+            }
+            
+            // 开始游戏
+            function startGame() {
+                if (gameActive) return;
+                
+                gameActive = true;
+                questionCount = 0;
+                score = 0;
+                level = 1;
+                
+                scoreDisplay.textContent = score;
+                levelDisplay.textContent = level;
+                startBtn.disabled = true;
+                submitBtn.disabled = false;
+                answerInput.disabled = false;
+                
+                displayQuestion();
+            }
+            
+            // 结束游戏
+            function endGame() {
+                gameActive = false;
+                showStatus(`游戏结束！总得分: ${score}`, 'correct');
+                startBtn.disabled = false;
+                submitBtn.disabled = true;
+                answerInput.disabled = true;
+            }
+            
+            // 重置游戏
+            function resetGame() {
+                gameActive = false;
+                questionCount = 0;
+                score = 0;
+                level = 1;
+                
+                scoreDisplay.textContent = score;
+                levelDisplay.textContent = level;
+                questionDisplay.textContent = '点击开始游戏';
+                gameStatus.textContent = '';
+                gameStatus.className = 'game-status';
+                answerInput.value = '';
+                startBtn.disabled = false;
+                submitBtn.disabled = true;
+                answerInput.disabled = true;
+            }
+            
+            // 事件监听器
+            submitBtn.addEventListener('click', checkAnswer);
+            
+            answerInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && gameActive) {
+                    checkAnswer();
+                }
+            });
+            
+            startBtn.addEventListener('click', startGame);
+            
+            resetBtn.addEventListener('click', resetGame);
+            
+            // 游戏开始时禁用输入
+            submitBtn.disabled = true;
+            answerInput.disabled = true;
+        });
+    </script>
+</body>
+</html>
